@@ -14,7 +14,7 @@ LINN ({L}-System interpreter developed in {INN}sbruck) is a small, configurable 
    * Condition evaluation for selecting production rules
    * Parameter values, default values, variables
    * Production/simulation notification actions (e.g. for actual rendering, logging of results, etc.)
- * Syntax mostly based on what can be found in Prusinkiewicz, Lindenmayer, Hanan, et al., "The Algorithmic Beauty of Plants", freely available [http://algorithmicbotany.org/papers/#abop here]
+ * Syntax mostly based on what can be found in Prusinkiewicz, Lindenmayer, Hanan, et al., "The Algorithmic Beauty of Plants", freely available [here](http://algorithmicbotany.org/papers/#abop)
 
 Project status: 5%
 
