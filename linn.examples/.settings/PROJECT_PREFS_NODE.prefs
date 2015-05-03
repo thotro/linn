@@ -1,0 +1,3 @@
+PROCESSING_APP_PATH=/opt/processing-2.2.1/
+PROCESSING_SKETCH_PATH=/home/thomas/git/linn/linn.examples/src/
+eclipse.preferences.version=1
