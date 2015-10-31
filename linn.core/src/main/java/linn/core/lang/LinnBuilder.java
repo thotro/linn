@@ -1,12 +1,9 @@
 package linn.core.lang;
 
-import java.util.List;
-
-import com.google.common.collect.Lists;
-
 import linn.core.Linn;
+import linn.core.LinnContainer;
 
-public class LinnBuilder {
+public class LinnBuilder implements LinnContainer {
 
 	public static LinnBuilder newLinn(String name) {
 		final Linn linn = new Linn();
@@ -31,11 +28,15 @@ public class LinnBuilder {
 	}
 	
 	public Linn build() {
-		return this.linn;
+		return this.getLinn();
 	}
 	
 	public ProductionRuleBuilder withRule(String ruleName) {
 		final ProductionRuleBuilder ruleBuilder = new ProductionRuleBuilder(this.linn, this);
 		return ruleBuilder.withName(ruleName);
+	}
+	
+	public Linn getLinn() {
+		return this.linn;
 	}
 }

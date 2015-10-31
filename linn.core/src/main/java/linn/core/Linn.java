@@ -1,14 +1,18 @@
 package linn.core;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import linn.core.lang.production.Production;
+import static com.google.common.base.Preconditions.*;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-public class Linn {
+public class Linn implements RuleProductionContainer {
 	// meta information
 	private String name;
 	private String author;
@@ -16,6 +20,8 @@ public class Linn {
 	// rules
 	final Map<String, List<Integer>> ruleIdsOfRuleName = Maps.newHashMap();
 	final Map<Integer, Float> weightOfRuleId = Maps.newHashMap();
+	// rule content
+	final Map<Integer, List<Production>> productionsOfRuleId = Maps.newHashMap();
 	
 	public Linn() {
 		this.setDate(new Date());
@@ -46,11 +52,36 @@ public class Linn {
 	}
 	
 	public void addRule(Integer ruleId, String ruleName) {
+		checkNotNull(ruleId);
+		checkNotNull(ruleName);
 		this.ruleIdsOfRuleName.putIfAbsent(ruleName, Lists.<Integer>newArrayList());
 		List<Integer> ruleIds = this.ruleIdsOfRuleName.get(ruleName);
 		ruleIds.add(ruleId);
 		// set default weight, if none is set yet
 		this.weightOfRuleId.putIfAbsent(ruleId, 1.0f);
+		// create empty list of productions for the rule
+		this.productionsOfRuleId.put(ruleId, Lists.<Production>newArrayList());
+	}
+	
+	public void addRuleProduction(Integer ruleId, Production production) {
+		checkNotNull(production);
+		checkArgument(this.productionsOfRuleId.containsKey(ruleId));
+		this.productionsOfRuleId.putIfAbsent(ruleId, Lists.<Production>newArrayList());
+		List<Production> ruleProductions = this.productionsOfRuleId.get(ruleId);
+		// add as last production
+		ruleProductions.add(production);
+	}
+	
+	@Override
+	public List<Production> getRuleProductions(Integer ruleId) {
+		checkNotNull(ruleId);
+		checkArgument(this.productionsOfRuleId.containsKey(ruleId));
+		return Collections.unmodifiableList(this.productionsOfRuleId.get(ruleId));
+	}
+	
+	public List<Integer> getRuleIds(String ruleName) {
+		checkNotNull(ruleName);
+		return Collections.unmodifiableList(this.ruleIdsOfRuleName.get(ruleName));
 	}
 	
 	public void setRuleWeight(Integer ruleId, float weight) {
@@ -72,7 +103,12 @@ public class Linn {
 		for(Entry<String, List<Integer>> ruleEntry : this.ruleIdsOfRuleName.entrySet()) {
 			String ruleName = ruleEntry.getKey();
 			for(Integer ruleId : ruleEntry.getValue()) {
-				sb.append("\t" + ruleName + " --" + this.weightOfRuleId.get(ruleId) + "-> " + "\n");
+				sb.append("\t" + ruleName + " --" + this.weightOfRuleId.get(ruleId) + "-> ");
+				for(Production prod : this.productionsOfRuleId.get(ruleId)) {
+					sb.append(prod.getName() + " ");
+				}
+				sb.deleteCharAt(sb.length()-1);
+				sb.append(";\n");
 			}
 		}
 		sb.append("}");

@@ -1,6 +1,7 @@
 package linn.core.lang;
 
 import linn.core.Linn;
+import linn.core.lang.production.ProductionParameter;
 
 
 public class ProductionRuleBuilder {
@@ -20,13 +21,18 @@ public class ProductionRuleBuilder {
 		return this;
 	}
 	
-	public ProductionRuleBuilder thatHasWeight(float weight) {
+	public ProductionRuleBuilder andParameter(String parameterName) {
+		ProductionParameter.register(parameterName);
+		return this;
+	}
+	
+	public ProductionRuleBuilder andWeight(float weight) {
 		this.linn.setRuleWeight(currentRuleId, weight);
 		return this;
 	}
 	
-	public ProductionRuleProductionBuilder andProduction() {
-		final ProductionRuleProductionBuilder contentBuilder = new ProductionRuleProductionBuilder(linn, parent, currentRuleId);
+	public ProductionRuleProductionBuilder<LinnBuilder> andProduction() {
+		final ProductionRuleProductionBuilder<LinnBuilder> contentBuilder = new ProductionRuleProductionBuilder<LinnBuilder>(linn, parent, currentRuleId);
 		currentRuleId++;
 		return contentBuilder;
 	}
