@@ -12,15 +12,18 @@ public class BuilderTest {
 	@Test
 	public void testBuildSimple() {
 		Linn linn = LinnBuilder.newLinn("testLinn").withAuthor("Thomas Trojer")
-				.withRule("H").andWeight(1.5f).andProduction().F().rewrite("H").done().build();
+				.withRule("H").andWeight(5.5).andProduction().F().rewrite("H").done()
+				.withRule("H").andWeight(0.5).andProduction().F().done()
+			.build();
 		System.out.println(linn);
 		
 		LinnExecutor executor = LinnExecutor.newExecutor().useLinn(linn).withAxiom().rewrite("H").done();
 		System.out.println(executor.getProductionResult());
-		executor.execute();
+		executor.executeAtMost(100, () -> {
+			System.out.println(executor.getProductionResult());
+		});
 		System.out.println(executor.getProductionResult());
-		executor.execute();
-		System.out.println(executor.getProductionResult());
+		System.out.println("Iterations: " + executor.getIterationCount());
 	}
 
 }

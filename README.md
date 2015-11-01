@@ -7,18 +7,19 @@ LINN ({L}-System interpreter developed in {INN}sbruck) is a small, configurable 
    * Both context-free and context-sensitive ones
    * Both stochastic and deterministic ones
    * Parameterized ones
- * Written in Java/ANTLR4
- * Core library has no other external dependencies
- * Core library does not include any render capabilities (although test/example projects will)
+ * Written in Java 8 with optional ANTLR4 grammar
+ * Core library has no noteworthy external dependencies (just Google Guava)
+ * Core library does not include any render capabilities (although examples do)
  * User code injection to accomplish the following:
    * Condition evaluation for selecting production rules
-   * Parameter values, default values, variables
-   * Production/simulation notification actions (e.g. for actual rendering, logging of results, etc.)
+   * Parameter values, default values and variables
+   * Notification actions on productions and entire interations (e.g. useful for rendering, logging of results, etc.)
  * Syntax mostly based on what can be found in Prusinkiewicz, Lindenmayer, Hanan, et al., "The Algorithmic Beauty of Plants", freely available [here](http://algorithmicbotany.org/papers/#abop)
+ * Examples will show both API usage, actual rendering in Processing/OpenGL and export of production results as meshes/point clouds
 
-Project status: 5%
+Project status: 10%
 
-Current milestone: Basic ANTLR grammar and parser infrastructure
+Current milestone: Java fluent API and execution infrastructure
 
 That's it for now :)
 

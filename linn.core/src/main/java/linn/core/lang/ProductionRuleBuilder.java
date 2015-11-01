@@ -26,7 +26,7 @@ public class ProductionRuleBuilder {
 		return this;
 	}
 	
-	public ProductionRuleBuilder andWeight(float weight) {
+	public ProductionRuleBuilder andWeight(double weight) {
 		this.linn.setRuleWeight(currentRuleId, weight);
 		return this;
 	}

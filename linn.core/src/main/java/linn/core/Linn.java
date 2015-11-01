@@ -19,7 +19,7 @@ public class Linn implements RuleProductionContainer {
 	private Date date;
 	// rules
 	final Map<String, List<Integer>> ruleIdsOfRuleName = Maps.newHashMap();
-	final Map<Integer, Float> weightOfRuleId = Maps.newHashMap();
+	final Map<Integer, Double> weightOfRuleId = Maps.newHashMap();
 	// rule content
 	final Map<Integer, List<Production>> productionsOfRuleId = Maps.newHashMap();
 	
@@ -32,6 +32,7 @@ public class Linn implements RuleProductionContainer {
 	}
 	
 	public void setName(String name) {
+		checkNotNull(name);
 		this.name = name;
 	}
 	
@@ -40,6 +41,7 @@ public class Linn implements RuleProductionContainer {
 	}
 	
 	public void setAuthor(String author) {
+		checkNotNull(author);
 		this.author = author;
 	}
 	
@@ -48,6 +50,7 @@ public class Linn implements RuleProductionContainer {
 	}
 	
 	protected void setDate(Date date) {
+		checkNotNull(date);
 		this.date = date;
 	}
 	
@@ -58,7 +61,7 @@ public class Linn implements RuleProductionContainer {
 		List<Integer> ruleIds = this.ruleIdsOfRuleName.get(ruleName);
 		ruleIds.add(ruleId);
 		// set default weight, if none is set yet
-		this.weightOfRuleId.putIfAbsent(ruleId, 1.0f);
+		this.weightOfRuleId.putIfAbsent(ruleId, 1.0);
 		// create empty list of productions for the rule
 		this.productionsOfRuleId.put(ruleId, Lists.<Production>newArrayList());
 	}
@@ -84,8 +87,16 @@ public class Linn implements RuleProductionContainer {
 		return Collections.unmodifiableList(this.ruleIdsOfRuleName.get(ruleName));
 	}
 	
-	public void setRuleWeight(Integer ruleId, float weight) {
+	public void setRuleWeight(Integer ruleId, double weight) {
+		checkNotNull(ruleId);
+		checkArgument(weight >= 0);
 		this.weightOfRuleId.put(ruleId, weight);
+	}
+	
+	public double getRuleWeight(Integer ruleId) {
+		checkNotNull(ruleId);
+		checkArgument(this.weightOfRuleId.containsKey(ruleId));
+		return this.weightOfRuleId.get(ruleId);
 	}
 
 	// init
