@@ -5,52 +5,61 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.TreeMap;
 
-import static com.google.common.base.Preconditions.*;
+import linn.core.Linn;
+
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 
-import linn.core.Linn;
+import static com.google.common.base.Preconditions.*;
 
 public class RewriteProduction implements Production {
 
-	private static final Random LOCAL_RAND = new Random(System.currentTimeMillis());
-	
-	private String ruleName;
+	private static final Random LOCAL_RAND = new Random(
+			System.currentTimeMillis());
+
+	private final String ruleName;
 	private final Linn linn;
-	
-	public RewriteProduction(String ruleName, final Linn linn) {
+
+	public RewriteProduction(final String ruleName, final Linn linn) {
 		this.ruleName = ruleName;
 		this.linn = linn;
 	}
-	
-	public List<Production> execute(ProductionParameter... parameters) {
-		List<Integer> ruleIds = this.linn.getRuleIds(ruleName);
-		if(ruleIds.size() == 1) {
-			Integer ruleId = Iterables.getOnlyElement(ruleIds);
+
+	@Override
+	public List<Production> execute(final ProductionParameter... parameters) {
+		final List<Integer> ruleIds = this.linn.getRuleIds(this.ruleName);
+		if (ruleIds.size() == 1) {
+			final Integer ruleId = Iterables.getOnlyElement(ruleIds);
 			// TODO check condition if any
-			List<Production> rewriteProductions = this.linn.getRuleProductions(ruleId);
+			final List<Production> rewriteProductions = this.linn
+					.getRuleProductions(ruleId);
 			return rewriteProductions;
-		} else if(ruleIds.size() > 1) {
+		} else if (ruleIds.size() > 1) {
 			// TODO impl conditional case
 			double totalRuleWeight = 0;
-			// range for probability based on weight for all potential rules 
-			TreeMap<Double, Integer> weightRangeOfRule = Maps.newTreeMap();
-			for(Integer ruleId : ruleIds) {
-				double ruleWeight = this.linn.getRuleWeight(ruleId);
+			// range for probability based on weight for all potential rules
+			final TreeMap<Double, Integer> weightRangeOfRule = Maps
+					.newTreeMap();
+			for (final Integer ruleId : ruleIds) {
+				final double ruleWeight = this.linn.getRuleWeight(ruleId);
 				totalRuleWeight += ruleWeight;
 				weightRangeOfRule.put(totalRuleWeight, ruleId);
 			}
-			// pick a random rule considering weights 
-			double chosenRangeValue = LOCAL_RAND.nextDouble() * totalRuleWeight;
-			Entry<Double, Integer> chosenRuleEntry = weightRangeOfRule.ceilingEntry(chosenRangeValue);
+			// pick a random rule considering weights
+			final double chosenRangeValue = LOCAL_RAND.nextDouble()
+					* totalRuleWeight;
+			final Entry<Double, Integer> chosenRuleEntry = weightRangeOfRule
+					.ceilingEntry(chosenRangeValue);
 			checkNotNull(chosenRuleEntry);
-			List<Production> rewriteProductions = this.linn.getRuleProductions(chosenRuleEntry.getValue());
+			final List<Production> rewriteProductions = this.linn
+					.getRuleProductions(chosenRuleEntry.getValue());
 			return rewriteProductions;
 		}
 		return null;
 	}
-	
+
+	@Override
 	public String getName() {
-		return ruleName;
+		return this.ruleName;
 	}
 }

@@ -12,7 +12,6 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
@@ -27,58 +26,63 @@ public class BasicParserTest {
 	@Test
 	public void test() {
 		// input and parse
-		CharStream inputStream = new ANTLRInputStream("linn name { H -> F F < > + - [ A B ]; }");
-		LinnLexer lexer = new LinnLexer(inputStream);
-		CommonTokenStream tokenStream = new CommonTokenStream(lexer);
-		LinnParser parser = new LinnParser(tokenStream);
-		LinnContext parseContext = parser.linn();
+		final CharStream inputStream = new ANTLRInputStream(
+				"linn name { H -> F F < > + - [ A B ]; }");
+		final LinnLexer lexer = new LinnLexer(inputStream);
+		final CommonTokenStream tokenStream = new CommonTokenStream(lexer);
+		final LinnParser parser = new LinnParser(tokenStream);
+		final LinnContext parseContext = parser.linn();
 		// extracts from the L-system definition
 		final Map<String, List<Integer>> ruleIdsOfRuleName = Maps.newHashMap();
 		final Map<Integer, Float> weightOfRuleId = Maps.newHashMap();
 		// visitor
-		ParseTreeWalker parseTreeWalker = ParseTreeWalker.DEFAULT;
+		final ParseTreeWalker parseTreeWalker = ParseTreeWalker.DEFAULT;
 		parseTreeWalker.walk(new ParseTreeListener() {
-			
+
 			private int currentRuleId = 0;
-			
+
 			@Override
-			public void visitTerminal(TerminalNode node) {
+			public void visitTerminal(final TerminalNode node) {
 				System.out.println("TERMINAL: " + node.getText());
 			}
-			
+
 			@Override
-			public void visitErrorNode(ErrorNode node) {
+			public void visitErrorNode(final ErrorNode node) {
 				// TODO Auto-generated method stub
-				
+
 			}
-			
+
 			@Override
-			public void exitEveryRule(ParserRuleContext ctx) {
+			public void exitEveryRule(final ParserRuleContext ctx) {
 				// TODO Auto-generated method stub
-				
+
 			}
-			
+
 			@Override
-			public void enterEveryRule(ParserRuleContext ctx) {
-				if(ctx instanceof LinnRuleContext) {
+			public void enterEveryRule(final ParserRuleContext ctx) {
+				if (ctx instanceof LinnRuleContext) {
 					// fetch info of rule
-					LinnRuleContext lctx = (LinnRuleContext)ctx;
-					String ruleName = lctx.name.getText().trim();
+					final LinnRuleContext lctx = (LinnRuleContext) ctx;
+					final String ruleName = lctx.name.getText().trim();
 					Float ruleWeight = 1.0f;
-					if(lctx.weight != null) {
-						ruleWeight = Float.valueOf(lctx.weight.getText().trim());
+					if (lctx.weight != null) {
+						ruleWeight = Float
+								.valueOf(lctx.weight.getText().trim());
 					}
 					// remember as extract
-					ruleIdsOfRuleName.putIfAbsent(ruleName, Lists.<Integer>newArrayList());
-					List<Integer> ruleIds = ruleIdsOfRuleName.get(ruleName);
-					ruleIds.add(currentRuleId);
-					weightOfRuleId.put(currentRuleId, ruleWeight);
-					System.out.println("LINN RULE: '" + ruleName + ", w(" + ruleWeight + ")'");
+					ruleIdsOfRuleName.putIfAbsent(ruleName,
+							Lists.<Integer> newArrayList());
+					final List<Integer> ruleIds = ruleIdsOfRuleName
+							.get(ruleName);
+					ruleIds.add(this.currentRuleId);
+					weightOfRuleId.put(this.currentRuleId, ruleWeight);
+					System.out.println("LINN RULE: '" + ruleName + ", w("
+							+ ruleWeight + ")'");
 				} else {
 					System.out.println("RULE ENTER: " + ctx.getRuleIndex());
 				}
 				// increment for next rule id
-				currentRuleId++;
+				this.currentRuleId++;
 			}
 		}, parseContext);
 	}
