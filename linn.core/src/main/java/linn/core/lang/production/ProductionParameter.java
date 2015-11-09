@@ -38,6 +38,10 @@ public class ProductionParameter {
 		this.value = new AtomicDouble(0.0);
 	}
 
+	public String getName() {
+		return this.name;
+	}
+
 	public double getValue() {
 		return this.value.get();
 	}

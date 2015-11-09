@@ -1,4 +1,4 @@
-package linn.core.grammar;
+package linn.grammar;
 
 import java.util.List;
 import java.util.Map;

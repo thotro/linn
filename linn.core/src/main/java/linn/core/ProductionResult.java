@@ -26,7 +26,7 @@ public class ProductionResult extends Axiom {
 		final StringBuilder sb = new StringBuilder();
 		sb.append("production result {\n\t");
 		for (final Production production : this.productions) {
-			sb.append(production.getName());
+			sb.append(production.getName() + " ");
 		}
 		sb.append("\n}");
 		return sb.toString();

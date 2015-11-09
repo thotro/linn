@@ -10,15 +10,15 @@ public class BuilderTest {
 	@Test
 	public void testBuildSimple() {
 		// define and print an L-System definition
-		final Linn linn = LinnBuilder
-				.newLinn("testLinn")
+		final Linn linn = LinnBuilder.newLinn("testLinn")
 				.withAuthor("Thomas Trojer")
 				// H --5.5-> F H
 				.withRule("H").andWeight(5.5).andProduction().F().rewrite("H")
 				.done()
 				// H --0.5-> F;
-				.withRule("H").andWeight(0.5).andProduction().F().done()
-				.build();
+				.withRule("H").andWeight(0.5).andProduction().F()
+				// branching
+				.branch().F().done().done().build();
 		System.out.println(linn);
 		// configure the execution environment and execute a number of times
 		final LinnExecutor executor = LinnExecutor.newExecutor().useLinn(linn)

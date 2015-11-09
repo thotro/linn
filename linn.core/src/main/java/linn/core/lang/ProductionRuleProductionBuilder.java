@@ -17,10 +17,14 @@
 
 package linn.core.lang;
 
+import linn.core.Linn;
 import linn.core.LinnContainer;
 import linn.core.RuleProductionContainer;
+import linn.core.lang.production.BranchProduction;
 import linn.core.lang.production.FProduction;
 import linn.core.lang.production.RewriteProduction;
+
+import static com.google.common.base.Preconditions.*;
 
 /**
  * A builder (with fluent API) to describe the actual production part of a
@@ -35,7 +39,8 @@ import linn.core.lang.production.RewriteProduction;
  * @author Thomas Trojer <thomas@trojer.net>
  * @param <T>
  */
-public class ProductionRuleProductionBuilder<T extends LinnContainer> {
+public class ProductionRuleProductionBuilder<T extends LinnContainer>
+implements LinnContainer {
 	// references
 	private final RuleProductionContainer ruleProductionContainer;
 	private final T parent;
@@ -45,9 +50,16 @@ public class ProductionRuleProductionBuilder<T extends LinnContainer> {
 	public ProductionRuleProductionBuilder(
 			final RuleProductionContainer ruleProductionContainer,
 			final T parent, final int ruleId) {
+		checkNotNull(ruleProductionContainer);
+		checkNotNull(parent);
 		this.ruleProductionContainer = ruleProductionContainer;
 		this.parent = parent;
 		this.ruleId = ruleId;
+	}
+
+	@Override
+	public Linn getLinn() {
+		return this.parent.getLinn();
 	}
 
 	public T done() {
@@ -73,23 +85,30 @@ public class ProductionRuleProductionBuilder<T extends LinnContainer> {
 		return this;
 	}
 
-	public ProductionRuleProductionBuilder<T> f() {
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public ProductionRuleProductionBuilder<ProductionRuleProductionBuilder<T>> branch() {
+		final BranchProduction branchProd = new BranchProduction(this);
+		this.ruleProductionContainer.addRuleProduction(this.ruleId, branchProd);
+		return branchProd.getProductionBuilder();
+	}
 
+	public ProductionRuleProductionBuilder<T> f() {
+		// TODO impl
 		return this;
 	}
 
 	public ProductionRuleProductionBuilder<T> yaw(final float deltaYaw) {
-
+		// TODO impl
 		return this;
 	}
 
 	public ProductionRuleProductionBuilder<T> pitch(final float deltaPitch) {
-
+		// TODO impl
 		return this;
 	}
 
 	public ProductionRuleProductionBuilder<T> roll(final float deltaRoll) {
-
+		// TODO impl
 		return this;
 	}
 }
