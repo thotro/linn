@@ -1,0 +1,4 @@
+/* Linn: Quick API doc */
+
+linn ::= "withName"? "withAuthor"? Production+
+Production ::= "F" | "f" | "rewrite" | "branch"
