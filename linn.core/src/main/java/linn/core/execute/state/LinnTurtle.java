@@ -27,15 +27,23 @@ import static com.google.common.base.Preconditions.*;
  */
 public class LinnTurtle {
 
-	private final Quaternion baseDirection;
-	private Quaternion position;
+	protected final Quaternion baseDirection;
+	protected Quaternion position;
+	protected Quaternion rotation;
+	protected double yaw;
+	protected double pitch;
+	protected double roll;
 
-	private Quaternion rotation;
-	private double yaw;
-	private double pitch;
-	private double roll;
+	protected Map<String, Object> properties;
 
-	private Map<String, Object> properties;
+	public LinnTurtle(final LinnTurtle copy) {
+		this.baseDirection = new Quaternion(copy.baseDirection);
+		this.position = new Quaternion(copy.position);
+		this.yaw = copy.yaw;
+		this.pitch = copy.pitch;
+		this.roll = copy.roll;
+		this.updateRotation();
+	}
 
 	public LinnTurtle() {
 		this(0, 0, 0, 0, 0, 0, Maps.newHashMap(), Quaternion.vector(0, 1, 0));

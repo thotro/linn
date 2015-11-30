@@ -24,6 +24,7 @@ import linn.core.Linn;
 import linn.core.LinnContainer;
 import linn.core.ProductionResult;
 import linn.core.RuleProductionContainer;
+import linn.core.execute.state.LinnTurtle;
 import linn.core.lang.ProductionRuleProductionBuilder;
 import linn.core.lang.production.Production;
 import linn.core.lang.production.RewriteProduction;
@@ -42,6 +43,9 @@ public class LinnExecutor implements LinnContainer {
 	private ProductionResult result = null;
 	private int iterations = 0;
 	private boolean terminated = false;
+	// turtle
+	private LinnTurtle state;
+	private ProductionExecutionHandler stateChangeHandler = null;
 
 	protected LinnExecutor() {
 	}
@@ -49,6 +53,13 @@ public class LinnExecutor implements LinnContainer {
 	public LinnExecutor useLinn(final Linn linn) {
 		checkNotNull(linn);
 		this.linn = linn;
+		return this;
+	}
+
+	public LinnExecutor onStateChanged(
+			final ProductionExecutionHandler stateChangeHandler) {
+		checkNotNull(stateChangeHandler);
+		this.stateChangeHandler = stateChangeHandler;
 		return this;
 	}
 
@@ -62,7 +73,7 @@ public class LinnExecutor implements LinnContainer {
 	}
 
 	public LinnExecutor executeAtMost(final int iterations) {
-		return this.executeAtMost(iterations, () -> {
+		return this.executeAtMost(iterations, p -> {
 		});
 	}
 
@@ -73,12 +84,14 @@ public class LinnExecutor implements LinnContainer {
 		while (this.isTerminated() == false
 				&& this.getIterationCount() < iterations) {
 			this.execute();
-			postHandler.handle();
+			postHandler.handle(this.result);
 		}
 		return this;
 	}
 
 	private LinnExecutor execute() {
+		// reset state
+		this.state = new LinnTurtle();
 		// early check of termination state
 		if (this.isTerminated()) {
 			return this;
@@ -95,7 +108,12 @@ public class LinnExecutor implements LinnContainer {
 		// execute
 		final ProductionResult newResult = new ProductionResult();
 		for (final Production production : currentAxiom.getRuleProductions(-1)) {
-			final List<Production> newProductions = production.execute();
+			final List<Production> newProductions = production
+					.execute(this.state);
+			if (this.stateChangeHandler != null) {
+				// notify state change
+				this.stateChangeHandler.handle(this.state);
+			}
 			if (newProductions == null) {
 				// terminated, nothing to add
 				continue;

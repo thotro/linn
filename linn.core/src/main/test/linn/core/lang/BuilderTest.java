@@ -21,11 +21,17 @@ public class BuilderTest {
 				.branch().F().done().done().build();
 		System.out.println(linn);
 		// configure the execution environment and execute a number of times
-		final LinnExecutor executor = LinnExecutor.newExecutor().useLinn(linn)
-				.withAxiom().rewrite("H").done();
+		final LinnExecutor executor = LinnExecutor
+				.newExecutor()
+				.useLinn(linn)
+				.onStateChanged(
+						t -> {
+							System.out.println("Turtle: " + t.getX() + ", "
+									+ t.getY() + ", " + t.getZ());
+						}).withAxiom().rewrite("H").done();
 		System.out.println(executor.getProductionResult());
-		executor.executeAtMost(100, () -> {
-			System.out.println(executor.getProductionResult());
+		executor.executeAtMost(100, p -> {
+			System.out.println(p);
 		});
 		System.out.println("Iterations: " + executor.getIterationCount());
 	}

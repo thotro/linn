@@ -66,14 +66,13 @@ implements LinnContainer {
 		return this.parent;
 	}
 
-	public ProductionRuleProductionBuilder<T> F(final FProduction prod) {
-		this.ruleProductionContainer.addRuleProduction(this.ruleId, prod);
-		return this;
-	}
+	// public ProductionRuleProductionBuilder<T> F(final FProduction prod) {
+	// this.ruleProductionContainer.addRuleProduction(this.ruleId, prod);
+	// return this;
+	// }
 
 	public ProductionRuleProductionBuilder<T> F() {
-		final FProduction fProd = new FProduction() {
-		};
+		final FProduction fProd = new FProduction();
 		this.ruleProductionContainer.addRuleProduction(this.ruleId, fProd);
 		return this;
 	}

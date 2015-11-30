@@ -1,5 +1,10 @@
 package linn.core.math;
 
+/**
+ * A quaternion. There's nothing more to say! ;)
+ *
+ * @author Thomas Trojer <thomas@trojer.net>
+ */
 public class Quaternion {
 
 	private final double w;
@@ -7,6 +12,12 @@ public class Quaternion {
 	private final double y;
 	private final double z;
 
+	/**
+	 * Copy constructor.
+	 * 
+	 * @param copy
+	 *            The quaternion to copy.
+	 */
 	public Quaternion(final Quaternion copy) {
 		this.w = copy.getW();
 		this.x = copy.getX();

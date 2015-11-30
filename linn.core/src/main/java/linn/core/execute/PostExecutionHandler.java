@@ -17,8 +17,10 @@
 
 package linn.core.execute;
 
+import linn.core.ProductionResult;
+
 @FunctionalInterface
 public interface PostExecutionHandler {
 
-	public void handle();
+	public void handle(final ProductionResult productionResult);
 }

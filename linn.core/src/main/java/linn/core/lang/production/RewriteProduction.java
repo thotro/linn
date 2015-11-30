@@ -6,6 +6,7 @@ import java.util.Random;
 import java.util.TreeMap;
 
 import linn.core.Linn;
+import linn.core.execute.state.LinnTurtle;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
@@ -26,7 +27,8 @@ public class RewriteProduction implements Production {
 	}
 
 	@Override
-	public List<Production> execute(final ProductionParameter... parameters) {
+	public List<Production> execute(final LinnTurtle state,
+			final ProductionParameter... parameters) {
 		final List<Integer> ruleIds = this.linn.getRuleIds(this.ruleName);
 		if (ruleIds.size() == 1) {
 			final Integer ruleId = Iterables.getOnlyElement(ruleIds);
