@@ -17,7 +17,12 @@
 
 package linn.core.execute;
 
+import java.util.Iterator;
 import java.util.List;
+
+import com.google.common.collect.Lists;
+
+import static com.google.common.base.Preconditions.*;
 
 import linn.core.Axiom;
 import linn.core.Linn;
@@ -28,8 +33,6 @@ import linn.core.execute.state.LinnTurtle;
 import linn.core.lang.ProductionRuleProductionBuilder;
 import linn.core.lang.production.Production;
 import linn.core.lang.production.RewriteProduction;
-
-import static com.google.common.base.Preconditions.*;
 
 public class LinnExecutor implements LinnContainer {
 
@@ -44,10 +47,14 @@ public class LinnExecutor implements LinnContainer {
 	private int iterations = 0;
 	private boolean terminated = false;
 	// turtle
-	private LinnTurtle state;
+	private LinnTurtle state = new LinnTurtle();
 	private ProductionExecutionHandler stateChangeHandler = null;
+	// helpers for partial execution
+	private List<Production> openProductions = Lists.newArrayList();
+	private ProductionResult openResult = null;
 
 	protected LinnExecutor() {
+		this.reset();
 	}
 
 	public LinnExecutor useLinn(final Linn linn) {
@@ -68,8 +75,43 @@ public class LinnExecutor implements LinnContainer {
 				this, -1);
 	}
 
+	/**
+	 * A partial execution gives back control to the caller after a single state
+	 * change occurred. This is useful in render loops with animations, where
+	 * typically not entire production execution results are awaited, but the
+	 * movement of the turtle is observed.
+	 * <p>
+	 * <b>Note</b> that in case you want to abort partial execution you need to
+	 * either call {@link #reset()} or start a new (non-partial) execution with
+	 * {@link #executeOnce()}, {@link #executeAtMost(int)} or
+	 * {@link #executeAtMost(int, PostExecutionHandler)}.
+	 *
+	 * @param postHandler
+	 *            The handler that is called after an execution is completed. In
+	 *            case of partial executions this is typically not after every
+	 *            call to # {@link #executePartial()} or
+	 *            {@link #executePartial(PostExecutionHandler)}.
+	 * @return This executor for chaining.
+	 */
+	public LinnExecutor executePartial(final PostExecutionHandler postHandler) {
+		this.execute(true);
+		if (this.openProductions.isEmpty()) {
+			postHandler.handle(this.result);
+		}
+		return this;
+	}
+
+	/**
+	 * See {@link #executePartial(PostExecutionHandler)}. No notification is
+	 * sent after execution completion.
+	 */
+	public LinnExecutor executePartial() {
+		return this.executePartial(p -> {
+		});
+	}
+
 	public LinnExecutor executeOnce() {
-		return this.execute();
+		return this.execute(false);
 	}
 
 	public LinnExecutor executeAtMost(final int iterations) {
@@ -83,15 +125,13 @@ public class LinnExecutor implements LinnContainer {
 		checkArgument(iterations > 0);
 		while (this.isTerminated() == false
 				&& this.getIterationCount() < iterations) {
-			this.execute();
+			this.execute(false);
 			postHandler.handle(this.result);
 		}
 		return this;
 	}
 
-	private LinnExecutor execute() {
-		// reset state
-		this.state = new LinnTurtle();
+	private LinnExecutor execute(boolean partial) {
 		// early check of termination state
 		if (this.isTerminated()) {
 			return this;
@@ -106,8 +146,14 @@ public class LinnExecutor implements LinnContainer {
 		// remember if at least one rewrite production was obtained
 		boolean willHaveRewrite = false;
 		// execute
-		final ProductionResult newResult = new ProductionResult();
-		for (final Production production : currentAxiom.getRuleProductions(-1)) {
+		if (this.openProductions.isEmpty()) {
+			this.resetState();
+			this.openProductions.addAll(currentAxiom.getRuleProductions(-1));
+			this.openResult = new ProductionResult();
+		}
+		Iterator<Production> productionIter = this.openProductions.iterator();
+		while (productionIter.hasNext()) {
+			final Production production = productionIter.next();
 			final List<Production> newProductions = production
 					.execute(this.state);
 			if (this.stateChangeHandler != null) {
@@ -120,20 +166,40 @@ public class LinnExecutor implements LinnContainer {
 			}
 			// add all new productions (most of the time this is one to one)
 			for (final Production newProduction : newProductions) {
-				newResult.addRuleProduction(-1, newProduction);
+				this.openResult.addRuleProduction(-1, newProduction);
 				if (newProduction instanceof RewriteProduction) {
 					willHaveRewrite = true;
 				}
+			}
+			// remove from open productions
+			productionIter.remove();
+			// check partial execution condition
+			if (partial && productionIter.hasNext() != false) {
+				return this;
 			}
 		}
 		// check if termination state changed
 		if (willHaveRewrite == false) {
 			this.terminated = true;
 		}
-		this.result = newResult;
+		this.result = this.openResult;
 		// successfully iterated
 		this.iterations++;
 		return this;
+	}
+
+	public void reset() {
+		this.result = null;
+		this.iterations = 0;
+		this.terminated = false;
+		this.resetState();
+	}
+
+	private void resetState() {
+		// TODO copy from initially given turtle state (yet to be implemented)
+		this.state = new LinnTurtle();
+		this.openProductions.clear();
+		this.openResult = null;
 	}
 
 	public RuleProductionContainer getProductionResult() {
@@ -142,6 +208,10 @@ public class LinnExecutor implements LinnContainer {
 		} else {
 			return this.result;
 		}
+	}
+
+	public LinnTurtle getState() {
+		return new LinnTurtle(this.state);
 	}
 
 	@Override

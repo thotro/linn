@@ -1,16 +1,16 @@
 package linn.core.lang;
 
+import org.junit.Test;
+
 import linn.core.Linn;
 import linn.core.execute.LinnExecutor;
-
-import org.junit.Test;
 
 public class BuilderTest {
 
 	@Test
 	public void testBuildSimple() {
 		// define and print an L-System definition
-		final Linn linn = LinnBuilder.newLinn("testLinn")
+		final Linn linn = LinnBuilder.newLinn("testBuildSimple")
 				.withAuthor("Thomas Trojer")
 				// H --5.5-> F H
 				.withRule("H").andWeight(5.5).andProduction().F().rewrite("H")
@@ -21,18 +21,41 @@ public class BuilderTest {
 				.branch().F().done().done().build();
 		System.out.println(linn);
 		// configure the execution environment and execute a number of times
-		final LinnExecutor executor = LinnExecutor
-				.newExecutor()
-				.useLinn(linn)
-				.onStateChanged(
-						t -> {
-							System.out.println("Turtle: " + t.getX() + ", "
-									+ t.getY() + ", " + t.getZ());
-						}).withAxiom().rewrite("H").done();
+		final LinnExecutor executor = LinnExecutor.newExecutor().useLinn(linn)
+				.onStateChanged(t -> {
+					System.out.println("Turtle: " + t.getX() + ", " + t.getY()
+							+ ", " + t.getZ());
+				}).withAxiom().rewrite("H").done();
 		System.out.println(executor.getProductionResult());
 		executor.executeAtMost(100, p -> {
 			System.out.println(p);
 		});
+		System.out.println("Iterations: " + executor.getIterationCount());
+	}
+
+	@Test
+	public void testBuildPartial() {
+		// define and print an L-System definition
+		final Linn linn = LinnBuilder.newLinn("testBuildPartial")
+				.withAuthor("Thomas Trojer")
+				// H --5.5-> F H
+				.withRule("H").andWeight(5.5).andProduction().F().rewrite("H")
+				.done()
+				// finalize
+				.build();
+		System.out.println(linn);
+		// configure the execution environment and execute a number of times
+		final LinnExecutor executor = LinnExecutor.newExecutor().useLinn(linn)
+				.onStateChanged(t -> {
+					System.out.println("Turtle: " + t.getX() + ", " + t.getY()
+							+ ", " + t.getZ());
+				}).withAxiom().rewrite("H").done();
+		for (int i = 0; i < 10; i++) {
+			executor.executePartial(p -> {
+				System.out.println(p);
+			});
+			System.out.println("Got back control briefly ...");
+		}
 		System.out.println("Iterations: " + executor.getIterationCount());
 	}
 
