@@ -1,0 +1,40 @@
+/* ==========================================================================
+ * LINN: QUICK API DOCUMENTATION
+ *
+ * Copyright (c) 2015 by Thomas Trojer <thomas@trojer.net>
+ * ==========================================================================
+ * - read as EBNF (? .. optional, + .. 1 or more, | ... logical or, ...)
+ * - quoted strings represent method names on "Linn" objects
+ * - the API is still expanding, but this doc will stay in-sync
+ */
+
+/* --------------------------------------------------------------------------
+ * L-System definitions
+ * ------------------------------------------------------------------------ */
+Linn ::= 		"withName"? 
+			"withAuthor"? 
+				ProductionRule+ 
+			"build"
+
+ProductionRule ::=	"withRule" 
+			"andWeight"? 
+			"andProduction" 
+				Production
+			"done"
+
+Production ::=		"F" | "f" | "rewrite" | "branch" Production+ "done" 
+
+/* --------------------------------------------------------------------------
+ * L-System definition execution
+ * ------------------------------------------------------------------------ */
+Executor ::=		"useLinn"
+			"onStateChange"?
+			"withAxiom" 
+				Production
+			"executeOnce"?
+			"executeAtMost"?
+			"executePartial"?
+			"reset"?
+			"getProductionResult"?
+			"getIterationCount"?
+
