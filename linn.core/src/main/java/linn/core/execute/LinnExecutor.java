@@ -17,10 +17,12 @@
 
 package linn.core.execute;
 
+import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Queues;
 
 import static com.google.common.base.Preconditions.*;
 
@@ -31,6 +33,7 @@ import linn.core.ProductionResult;
 import linn.core.RuleProductionContainer;
 import linn.core.execute.state.LinnTurtle;
 import linn.core.lang.ProductionRuleProductionBuilder;
+import linn.core.lang.production.BranchProduction;
 import linn.core.lang.production.Production;
 import linn.core.lang.production.RewriteProduction;
 
@@ -48,7 +51,8 @@ public class LinnExecutor implements LinnContainer {
 	private boolean terminated = false;
 	// turtle
 	private LinnTurtle state = new LinnTurtle();
-	private ProductionExecutionHandler stateChangeHandler = null;
+	// state change handler
+	private StateChangeHandler stateChangeHandler;
 	// helpers for partial execution
 	private List<Production> openProductions = Lists.newArrayList();
 	private ProductionResult openResult = null;
@@ -64,9 +68,12 @@ public class LinnExecutor implements LinnContainer {
 	}
 
 	public LinnExecutor onStateChanged(
-			final ProductionExecutionHandler stateChangeHandler) {
+			final StateChangeHandler stateChangeHandler) {
 		checkNotNull(stateChangeHandler);
 		this.stateChangeHandler = stateChangeHandler;
+		if (this.stateChangeHandler != null) {
+			this.state.addStateChangeHandler(this.stateChangeHandler);
+		}
 		return this;
 	}
 
@@ -156,10 +163,6 @@ public class LinnExecutor implements LinnContainer {
 			final Production production = productionIter.next();
 			final List<Production> newProductions = production
 					.execute(this.state);
-			if (this.stateChangeHandler != null) {
-				// notify state change
-				this.stateChangeHandler.handle(this.state);
-			}
 			if (newProductions == null) {
 				// terminated, nothing to add
 				continue;
@@ -167,7 +170,8 @@ public class LinnExecutor implements LinnContainer {
 			// add all new productions (most of the time this is one to one)
 			for (final Production newProduction : newProductions) {
 				this.openResult.addRuleProduction(-1, newProduction);
-				if (newProduction instanceof RewriteProduction) {
+				// check if this production will rewrite in any way
+				if (this.willRewrite(newProduction)) {
 					willHaveRewrite = true;
 				}
 			}
@@ -198,6 +202,9 @@ public class LinnExecutor implements LinnContainer {
 	private void resetState() {
 		// TODO copy from initially given turtle state (yet to be implemented)
 		this.state = new LinnTurtle();
+		if (this.stateChangeHandler != null) {
+			this.state.addStateChangeHandler(this.stateChangeHandler);
+		}
 		this.openProductions.clear();
 		this.openResult = null;
 	}
@@ -225,5 +232,27 @@ public class LinnExecutor implements LinnContainer {
 
 	public boolean isTerminated() {
 		return this.terminated;
+	}
+
+	private boolean willRewrite(Production production) {
+		// fill worker queue
+		Deque<Production> openProduction = Queues.newArrayDeque();
+		openProduction.offer(production);
+		// till no production to consider ...
+		while (openProduction.isEmpty() == false) {
+			Production currentProduction = openProduction.poll();
+			if (currentProduction instanceof RewriteProduction) {
+				// we're not done, for sure, as we found a rewrite production
+				return true;
+			} else if (currentProduction instanceof BranchProduction<?>) {
+				BranchProduction<?> branchProduction = (BranchProduction<?>) currentProduction;
+				List<Production> branchInnerProductions = branchProduction
+						.getRuleProductions(-1);
+				for (Production branchInnerProduction : branchInnerProductions) {
+					openProduction.offer(branchInnerProduction);
+				}
+			}
+		}
+		return false;
 	}
 }

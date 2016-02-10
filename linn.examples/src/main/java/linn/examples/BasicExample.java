@@ -9,6 +9,7 @@ import processing.core.PApplet;
 public class BasicExample extends PApplet {
 
 	private LinnExecutor linnExecutor;
+	private LinnTurtle previousState;
 
 	@Override
 	public void setup() {
@@ -23,8 +24,8 @@ public class BasicExample extends PApplet {
 				.withRule("H").andWeight(2).andProduction().F(10).rewrite("H")
 				.done()
 				// rule 2)
-				.withRule("H").andWeight(1).andProduction().F(20).rewrite("H")
-				.done()
+				.withRule("H").andWeight(1).andProduction().F(20).branch()
+				.yaw(20f).F(10).done().rewrite("H").done()
 				// finalize
 				.build();
 		/*
@@ -34,8 +35,17 @@ public class BasicExample extends PApplet {
 		 */
 		this.linnExecutor = LinnExecutor.newExecutor().useLinn(linn)
 				.onStateChanged(t -> {
-					System.out.println("Turtle: " + t.getX() + ", " + t.getY()
-							+ ", " + t.getZ());
+					// System.out.println("Turtle: " + t.getX() + ", " +
+					// t.getY()
+					// + ", " + t.getZ());
+					if (this.previousState == null) {
+						this.previousState = t;
+					} else {
+						this.line(400 + (float) this.previousState.getX(),
+								300 + (float) this.previousState.getY(),
+								400 + (float) t.getX(), 300 + (float) t.getY());
+						this.previousState = t;
+					}
 				})
 				// axiom to start the L-System with
 				.withAxiom().rewrite("H").done();
@@ -50,22 +60,14 @@ public class BasicExample extends PApplet {
 	@Override
 	public void mouseClicked() {
 		super.mouseClicked();
+		this.background(255);
 		this.redraw();
 	}
 
 	@Override
 	public void draw() {
-		LinnTurtle beforeState = this.linnExecutor.getState();
-		this.linnExecutor.executePartial(p -> {
-			System.out.println("fill");
-			this.fill(255, 255, 255);
-		});
-		LinnTurtle afterState = this.linnExecutor.getState();
-		System.out.println(beforeState + " -- " + afterState);
-		this.line(400 + (float) beforeState.getX(),
-				300 + (float) beforeState.getY(),
-				400 + (float) afterState.getX(),
-				300 + (float) afterState.getY());
+		this.linnExecutor.executeOnce();
+
 	}
 
 	public static void main(String _args[]) {

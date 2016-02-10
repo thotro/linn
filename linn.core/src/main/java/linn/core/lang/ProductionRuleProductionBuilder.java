@@ -17,14 +17,15 @@
 
 package linn.core.lang;
 
+import static com.google.common.base.Preconditions.*;
+
 import linn.core.Linn;
 import linn.core.LinnContainer;
 import linn.core.RuleProductionContainer;
 import linn.core.lang.production.BranchProduction;
 import linn.core.lang.production.FProduction;
 import linn.core.lang.production.RewriteProduction;
-
-import static com.google.common.base.Preconditions.*;
+import linn.core.lang.production.RotationProduction;
 
 /**
  * A builder (with fluent API) to describe the actual production part of a
@@ -40,7 +41,7 @@ import static com.google.common.base.Preconditions.*;
  * @param <T>
  */
 public class ProductionRuleProductionBuilder<T extends LinnContainer>
-implements LinnContainer {
+		implements LinnContainer {
 	// references
 	private final RuleProductionContainer ruleProductionContainer;
 	private final T parent;
@@ -77,6 +78,12 @@ implements LinnContainer {
 		return this;
 	}
 
+	public ProductionRuleProductionBuilder<T> F(double length) {
+		final FProduction fProd = new FProduction(length);
+		this.ruleProductionContainer.addRuleProduction(this.ruleId, fProd);
+		return this;
+	}
+
 	public ProductionRuleProductionBuilder<T> rewrite(final String ruleName) {
 		final RewriteProduction rwProd = new RewriteProduction(ruleName,
 				this.parent.getLinn());
@@ -97,17 +104,23 @@ implements LinnContainer {
 	}
 
 	public ProductionRuleProductionBuilder<T> yaw(final float deltaYaw) {
-		// TODO impl
+		final RotationProduction rotProd = new RotationProduction(deltaYaw, 0,
+				0);
+		this.ruleProductionContainer.addRuleProduction(this.ruleId, rotProd);
 		return this;
 	}
 
 	public ProductionRuleProductionBuilder<T> pitch(final float deltaPitch) {
-		// TODO impl
+		final RotationProduction rotProd = new RotationProduction(0, deltaPitch,
+				0);
+		this.ruleProductionContainer.addRuleProduction(this.ruleId, rotProd);
 		return this;
 	}
 
 	public ProductionRuleProductionBuilder<T> roll(final float deltaRoll) {
-		// TODO impl
+		final RotationProduction rotProd = new RotationProduction(0, 0,
+				deltaRoll);
+		this.ruleProductionContainer.addRuleProduction(this.ruleId, rotProd);
 		return this;
 	}
 }

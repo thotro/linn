@@ -59,4 +59,26 @@ public class BuilderTest {
 		System.out.println("Iterations: " + executor.getIterationCount());
 	}
 
+	@Test
+	public void testBuildBranch() {
+		// define and print an L-System definition
+		final Linn linn = LinnBuilder.newLinn("testBuildSimple")
+				.withAuthor("Thomas Trojer")
+				// H ---> F [ H H ]
+				.withRule("H").andProduction().F().branch().rewrite("H")
+				.rewrite("H").done().done().build();
+		System.out.println(linn);
+		// configure the execution environment and execute a number of times
+		final LinnExecutor executor = LinnExecutor.newExecutor().useLinn(linn)
+				.onStateChanged(t -> {
+					System.out.println("Turtle: " + t.getX() + ", " + t.getY()
+							+ ", " + t.getZ());
+				}).withAxiom().rewrite("H").done();
+		System.out.println(executor.getProductionResult());
+		executor.executeAtMost(10, p -> {
+			System.out.println(p);
+		});
+		System.out.println("Iterations: " + executor.getIterationCount());
+	}
+
 }
