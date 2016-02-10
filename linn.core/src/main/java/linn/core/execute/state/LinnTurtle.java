@@ -178,4 +178,19 @@ public class LinnTurtle {
 			handler.handle(this);
 		}
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder("state {\n");
+		sb.append("\tposition (" + this.getX() + ", " + this.getY() + ", "
+				+ this.getZ() + ")\n");
+		if (this.traceStates && this.previousState != null) {
+			sb.append("\tprevious position (" + this.getX() + ", " + this.getY()
+					+ ", " + this.getZ() + ")\n");
+		} else if (this.traceStates) {
+			sb.append("\tprevious position (n/a)\n");
+		}
+		sb.append("}");
+		return sb.toString();
+	}
 }

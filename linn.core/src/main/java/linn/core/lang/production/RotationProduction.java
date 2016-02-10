@@ -5,6 +5,7 @@ import java.util.List;
 import com.google.common.collect.Lists;
 
 import linn.core.execute.state.LinnTurtle;
+import linn.core.math.NumberUtil;
 
 public class RotationProduction implements Production {
 
@@ -22,9 +23,15 @@ public class RotationProduction implements Production {
 	@Override
 	public List<Production> execute(final LinnTurtle state,
 			ProductionParameter... parameters) {
-		state.yaw(this.deltaYaw);
-		state.pitch(this.deltaPitch);
-		state.roll(this.deltaRoll);
+		if (NumberUtil.doubleIsDifferent(this.deltaYaw, 0, 1e-9)) {
+			state.yaw(this.deltaYaw);
+		}
+		if (NumberUtil.doubleIsDifferent(this.deltaPitch, 0, 1e-9)) {
+			state.pitch(this.deltaPitch);
+		}
+		if (NumberUtil.doubleIsDifferent(this.deltaRoll, 0, 1e-9)) {
+			state.roll(this.deltaRoll);
+		}
 		return Lists.newArrayList(this);
 	}
 

@@ -9,23 +9,14 @@ import processing.core.PApplet;
 public class BasicExample extends PApplet {
 
 	private LinnExecutor linnExecutor;
-	private LinnTurtle previousState;
 
 	@Override
 	public void setup() {
-		/*
-		 * Defining the following L-System definition:
-		 * 1) H --5.5-> F H
-		 * 2) H --0.5-> F [ F ];
-		 */
 		final Linn linn = LinnBuilder.newLinn("BasicExample")
 				.withAuthor("Thomas Trojer")
-				// rule 1)
-				.withRule("H").andWeight(2).andProduction().F(10).rewrite("H")
+				// rule
+				.withRule("H").andProduction().F(10).yaw(1.0f).rewrite("H")
 				.done()
-				// rule 2)
-				.withRule("H").andWeight(1).andProduction().F(20).branch()
-				.yaw(20f).F(10).done().rewrite("H").done()
 				// finalize
 				.build();
 		/*
@@ -34,18 +25,15 @@ public class BasicExample extends PApplet {
 		 * - the axiom 'H'
 		 */
 		this.linnExecutor = LinnExecutor.newExecutor().useLinn(linn)
-				.onStateChanged(t -> {
-					// System.out.println("Turtle: " + t.getX() + ", " +
-					// t.getY()
-					// + ", " + t.getZ());
-					if (this.previousState == null) {
-						this.previousState = t;
-					} else {
-						this.line(400 + (float) this.previousState.getX(),
-								300 + (float) this.previousState.getY(),
-								400 + (float) t.getX(), 300 + (float) t.getY());
-						this.previousState = t;
+				.traceStates(true).onStateChanged(t -> {
+					System.out.println("Turtle: " + t.getX() + ", " + t.getY()
+							+ ", " + t.getZ());
+					if (t.getPreviousState() == null) {
+						return;
 					}
+					LinnTurtle tp = t.getPreviousState();
+					this.line(400 + (float) tp.getX(), 300 + (float) tp.getY(),
+							400 + (float) t.getX(), 300 + (float) t.getY());
 				})
 				// axiom to start the L-System with
 				.withAxiom().rewrite("H").done();

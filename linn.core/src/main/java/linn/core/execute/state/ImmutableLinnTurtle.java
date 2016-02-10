@@ -1,7 +1,5 @@
 package linn.core.execute.state;
 
-import com.google.common.collect.Lists;
-
 public class ImmutableLinnTurtle extends LinnTurtle {
 
 	public ImmutableLinnTurtle(final LinnTurtle copy) {
@@ -9,7 +7,7 @@ public class ImmutableLinnTurtle extends LinnTurtle {
 				copy.yaw, copy.pitch, copy.roll, copy.properties,
 				copy.baseDirection);
 		// fields additionally considered for copying
-		this.stateChangeHandlers = Lists.newArrayList(copy.stateChangeHandlers);
+		// NOTE: no state change handlers
 		this.previousState = copy.previousState;
 		this.traceStates = copy.traceStates;
 	}
