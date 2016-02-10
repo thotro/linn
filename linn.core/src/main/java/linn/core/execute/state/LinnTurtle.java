@@ -39,18 +39,20 @@ public class LinnTurtle {
 
 	protected Map<String, Object> properties;
 
+	protected LinnTurtle previousState = null;
+	protected boolean traceStates = false;
+
 	protected List<StateChangeHandler> stateChangeHandlers = Lists
 			.newArrayList();
 
 	public LinnTurtle(final LinnTurtle copy) {
-		this.baseDirection = new Quaternion(copy.baseDirection);
-		this.position = new Quaternion(copy.position);
-		this.yaw = copy.yaw;
-		this.pitch = copy.pitch;
-		this.roll = copy.roll;
-		this.properties = copy.properties;
+		this(copy.position.getX(), copy.position.getY(), copy.position.getZ(),
+				copy.yaw, copy.pitch, copy.roll, copy.properties,
+				copy.baseDirection);
+		// fields additionally considered for copying
 		this.stateChangeHandlers = Lists.newArrayList(copy.stateChangeHandlers);
-		this.updateRotation();
+		this.previousState = copy.previousState;
+		this.traceStates = copy.traceStates;
 	}
 
 	public LinnTurtle() {
@@ -80,13 +82,21 @@ public class LinnTurtle {
 		this.updateRotation();
 	}
 
-	public void addStateChangeHandler(
-			final StateChangeHandler handler) {
+	public void setTrace(boolean trace) {
+		this.traceStates = trace;
+	}
+
+	public LinnTurtle getPreviousState() {
+		checkArgument(this.traceStates,
+				"Tracing of previous states is disabled. Enable with LinnExecutor#traceStates(true).");
+		return this.previousState;
+	}
+
+	public void addStateChangeHandler(final StateChangeHandler handler) {
 		this.stateChangeHandlers.add(handler);
 	}
 
-	public void removeStateChangeHandler(
-			final StateChangeHandler handler) {
+	public void removeStateChangeHandler(final StateChangeHandler handler) {
 		this.stateChangeHandlers.remove(handler);
 	}
 
@@ -99,14 +109,16 @@ public class LinnTurtle {
 	}
 
 	public void move(double distance) {
+		this.traceStateChange();
 		Quaternion moveDir = this.baseDirection.scalar(distance);
 		Quaternion rotationCon = this.rotation.conjugated();
 		Quaternion move = this.rotation.times(moveDir).times(rotationCon);
 		this.position = this.position.plus(move);
-		this.fireStateChange();
+		this.notifyStateChange();
 	}
 
 	public void yaw(double delta) {
+		this.traceStateChange();
 		this.yaw += delta;
 		if (this.yaw >= 2 * Math.PI) {
 			this.yaw -= 2 * Math.PI;
@@ -114,10 +126,11 @@ public class LinnTurtle {
 			this.yaw = 2 * Math.PI - this.yaw;
 		}
 		this.updateRotation();
-		this.fireStateChange();
+		this.notifyStateChange();
 	}
 
 	public void pitch(double delta) {
+		this.traceStateChange();
 		this.pitch += delta;
 		if (this.pitch >= 2 * Math.PI) {
 			this.pitch -= 2 * Math.PI;
@@ -125,10 +138,11 @@ public class LinnTurtle {
 			this.pitch = 2 * Math.PI - this.pitch;
 		}
 		this.updateRotation();
-		this.fireStateChange();
+		this.notifyStateChange();
 	}
 
 	public void roll(double delta) {
+		this.traceStateChange();
 		this.roll += delta;
 		if (this.roll >= 2 * Math.PI) {
 			this.roll -= 2 * Math.PI;
@@ -136,7 +150,7 @@ public class LinnTurtle {
 			this.roll = 2 * Math.PI - this.roll;
 		}
 		this.updateRotation();
-		this.fireStateChange();
+		this.notifyStateChange();
 	}
 
 	public double getX() {
@@ -151,7 +165,15 @@ public class LinnTurtle {
 		return this.position.getZ();
 	}
 
-	private void fireStateChange() {
+	private void traceStateChange() {
+		if (this.traceStates) {
+			LinnTurtle currentState = new ImmutableLinnTurtle(this);
+			this.previousState = currentState;
+		}
+	}
+
+	private void notifyStateChange() {
+		// notify state change handlers
 		for (StateChangeHandler handler : this.stateChangeHandlers) {
 			handler.handle(this);
 		}

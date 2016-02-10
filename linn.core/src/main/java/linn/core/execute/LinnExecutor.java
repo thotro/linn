@@ -31,6 +31,7 @@ import linn.core.Linn;
 import linn.core.LinnContainer;
 import linn.core.ProductionResult;
 import linn.core.RuleProductionContainer;
+import linn.core.execute.state.ImmutableLinnTurtle;
 import linn.core.execute.state.LinnTurtle;
 import linn.core.lang.ProductionRuleProductionBuilder;
 import linn.core.lang.production.BranchProduction;
@@ -51,6 +52,8 @@ public class LinnExecutor implements LinnContainer {
 	private boolean terminated = false;
 	// turtle
 	private LinnTurtle state = new LinnTurtle();
+	// trace turtle states
+	private boolean traceStates = true;
 	// state change handler
 	private StateChangeHandler stateChangeHandler;
 	// helpers for partial execution
@@ -80,6 +83,12 @@ public class LinnExecutor implements LinnContainer {
 	public ProductionRuleProductionBuilder<LinnExecutor> withAxiom() {
 		return new ProductionRuleProductionBuilder<LinnExecutor>(this.axiom,
 				this, -1);
+	}
+
+	public LinnExecutor traceStates(boolean trace) {
+		this.traceStates = trace;
+		this.state.setTrace(this.traceStates);
+		return this;
 	}
 
 	/**
@@ -205,6 +214,7 @@ public class LinnExecutor implements LinnContainer {
 		if (this.stateChangeHandler != null) {
 			this.state.addStateChangeHandler(this.stateChangeHandler);
 		}
+		this.state.setTrace(this.traceStates);
 		this.openProductions.clear();
 		this.openResult = null;
 	}
@@ -218,7 +228,7 @@ public class LinnExecutor implements LinnContainer {
 	}
 
 	public LinnTurtle getState() {
-		return new LinnTurtle(this.state);
+		return new ImmutableLinnTurtle(this.state);
 	}
 
 	@Override
