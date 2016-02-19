@@ -15,7 +15,7 @@ public class BasicExample extends PApplet {
 		final Linn linn = LinnBuilder.newLinn("BasicExample")
 				.withAuthor("Thomas Trojer")
 				// rule
-				.withRule("H").andProduction().F(10).yaw(1.0f).rewrite("H")
+				.withRule("H").andProduction().roll(1.0f).F(100).rewrite("H")
 				.done()
 				// finalize
 				.build();
@@ -26,8 +26,7 @@ public class BasicExample extends PApplet {
 		 */
 		this.linnExecutor = LinnExecutor.newExecutor().useLinn(linn)
 				.traceStates(true).onStateChanged(t -> {
-					System.out.println("Turtle: " + t.getX() + ", " + t.getY()
-							+ ", " + t.getZ());
+					System.out.println(t);
 					if (t.getPreviousState() == null) {
 						return;
 					}
@@ -36,7 +35,7 @@ public class BasicExample extends PApplet {
 							400 + (float) t.getX(), 300 + (float) t.getY());
 				})
 				// axiom to start the L-System with
-				.withAxiom().rewrite("H").done();
+				.withAxiom().roll((float) Math.PI * 0.5f).rewrite("H").done();
 	}
 
 	@Override
@@ -55,6 +54,7 @@ public class BasicExample extends PApplet {
 	@Override
 	public void draw() {
 		this.linnExecutor.executeOnce();
+		System.out.println(this.linnExecutor.getProductionResult());
 
 	}
 

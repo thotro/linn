@@ -67,10 +67,13 @@ public class ProductionRuleProductionBuilder<T extends LinnContainer>
 		return this.parent;
 	}
 
-	// public ProductionRuleProductionBuilder<T> F(final FProduction prod) {
-	// this.ruleProductionContainer.addRuleProduction(this.ruleId, prod);
-	// return this;
-	// }
+	public ProductionRuleProductionBuilder<T> move() {
+		return this.F();
+	}
+
+	public ProductionRuleProductionBuilder<T> move(double length) {
+		return this.F(length);
+	}
 
 	public ProductionRuleProductionBuilder<T> F() {
 		final FProduction fProd = new FProduction();
@@ -100,6 +103,14 @@ public class ProductionRuleProductionBuilder<T extends LinnContainer>
 
 	public ProductionRuleProductionBuilder<T> f() {
 		// TODO impl
+		return this;
+	}
+
+	public ProductionRuleProductionBuilder<T> rotate(final float deltaYaw,
+			final float deltaPitch, final float deltaRoll) {
+		final RotationProduction rotProd = new RotationProduction(deltaYaw,
+				deltaPitch, deltaRoll);
+		this.ruleProductionContainer.addRuleProduction(this.ruleId, rotProd);
 		return this;
 	}
 

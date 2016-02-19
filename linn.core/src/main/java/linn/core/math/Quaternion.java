@@ -14,7 +14,7 @@ public class Quaternion {
 
 	/**
 	 * Copy constructor.
-	 * 
+	 *
 	 * @param copy
 	 *            The quaternion to copy.
 	 */
@@ -72,10 +72,20 @@ public class Quaternion {
 		return new Quaternion(nw, nx, ny, nz);
 	}
 
+	public Quaternion reverseTimes(Quaternion b) {
+		Quaternion a = this;
+		double nx = b.w * a.x + b.x * a.w + b.y * a.z - b.z * a.y;
+		double ny = b.w * a.y + b.y * a.w + b.z * a.x - b.x * a.z;
+		double nz = b.w * a.z + b.z * a.w + b.x * a.y - b.y * a.x;
+		double nw = b.w * a.w - b.x * a.x - b.y * a.y - b.z * a.z;
+		return new Quaternion(nw, nx, ny, nz);
+	}
+
 	public Quaternion inverted() {
-		double d = this.w * this.w + this.x * this.x + this.y * this.y + this.z
-				* this.z;
-		return new Quaternion(this.w / d, -this.x / d, -this.y / d, -this.z / d);
+		double d = this.w * this.w + this.x * this.x + this.y * this.y
+				+ this.z * this.z;
+		return new Quaternion(this.w / d, -this.x / d, -this.y / d,
+				-this.z / d);
 	}
 
 	public Quaternion divides(Quaternion b) {
@@ -84,17 +94,20 @@ public class Quaternion {
 
 	public static Quaternion rotation(double yaw, double pitch, double roll) {
 		// ratios of euler angles
-		double c1 = Math.cos(yaw / 2);
-		double c2 = Math.cos(pitch / 2);
-		double c3 = Math.cos(roll / 2);
-		double s1 = Math.sin(yaw / 2);
-		double s2 = Math.sin(pitch / 2);
-		double s3 = Math.sin(roll / 2);
+		double yawH = yaw * 0.5;
+		double pitchH = pitch * 0.5;
+		double rollH = roll * 0.5;
+		double cYaw = Math.cos(yawH);
+		double cPitch = Math.cos(pitchH);
+		double cRoll = Math.cos(rollH);
+		double sYaw = Math.sin(yawH);
+		double sPitch = Math.sin(pitchH);
+		double sRoll = Math.sin(rollH);
 		// quaternion components
-		double nw = c1 * c2 * c3 - s1 * s2 * s3;
-		double nx = s1 * s2 * c3 + c1 * c2 * s3;
-		double ny = s1 * c2 * c3 + c1 * s2 * s3;
-		double nz = c1 * s2 * c3 - s1 * c2 * s3;
+		double nw = cYaw * cPitch * cRoll + sYaw * sPitch * sRoll;
+		double nx = cYaw * sPitch * cRoll + sYaw * cPitch * sRoll;
+		double ny = sYaw * cPitch * cRoll - cYaw * sPitch * sRoll;
+		double nz = cYaw * cPitch * sRoll - sYaw * cPitch * sRoll;
 		return new Quaternion(nw, nx, ny, nz);
 	}
 

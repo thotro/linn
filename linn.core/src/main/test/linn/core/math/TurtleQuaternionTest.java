@@ -1,8 +1,8 @@
 package linn.core.math;
 
-import linn.core.execute.state.LinnTurtle;
-
 import org.junit.Test;
+
+import linn.core.execute.state.LinnTurtle;
 
 public class TurtleQuaternionTest {
 
@@ -17,14 +17,24 @@ public class TurtleQuaternionTest {
 	@Test
 	public void testTurtleMove() {
 		LinnTurtle turtle = new LinnTurtle();
-		System.out.println(turtle.getX() + ", " + turtle.getY() + ", "
-				+ turtle.getZ());
+		System.out.println(turtle);
+
 		turtle.move(3);
-		System.out.println(turtle.getX() + ", " + turtle.getY() + ", "
-				+ turtle.getZ());
-		turtle.pitch(-1);
+		System.out.println(turtle);
+
+		turtle = new LinnTurtle(turtle);
+		turtle.pitch(-Math.PI * 0.5);
 		turtle.move(2);
-		System.out.println(turtle.getX() + ", " + turtle.getY() + ", "
-				+ turtle.getZ());
+		System.out.println(turtle);
+
+		turtle = new LinnTurtle(turtle);
+		turtle.roll(-Math.PI * 0.5f);
+		turtle.move(10);
+		System.out.println(turtle);
+		turtle = new LinnTurtle(turtle);
+
+		turtle.yaw(-Math.PI * 0.5);
+		turtle.move(20);
+		System.out.println(turtle);
 	}
 }

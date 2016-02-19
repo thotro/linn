@@ -4,8 +4,7 @@ public class ImmutableLinnTurtle extends LinnTurtle {
 
 	public ImmutableLinnTurtle(final LinnTurtle copy) {
 		super(copy.position.getX(), copy.position.getY(), copy.position.getZ(),
-				copy.yaw, copy.pitch, copy.roll, copy.properties,
-				copy.baseDirection);
+				copy.getView(), copy.getRotation(), copy.properties);
 		// fields additionally considered for copying
 		// NOTE: no state change handlers
 		this.previousState = copy.previousState;
