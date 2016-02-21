@@ -17,6 +17,9 @@ LINN ({L}-System interpreter developed in {INN}sbruck) is a small, configurable 
  * Syntax mostly based on what can be found in Prusinkiewicz, Lindenmayer, Hanan, et al., "The Algorithmic Beauty of Plants", freely available [here](http://algorithmicbotany.org/papers/#abop)
  * Examples will show both API usage, actual rendering in Processing/OpenGL and export of production results as meshes/point clouds
 
+Status
+------
+
 Project status: 40%
 
 What works so far: 
@@ -28,7 +31,11 @@ What works so far:
 
 Current milestone: further productions, parameterized rules, examples
 
-Below you can find some example outputs:
+Contents
+--------
+
+ * [Project structure](../../wiki/Project-structure)
+ * [Example outputs](../../wiki/Example-outputs)
 
 That's it for now :)
 
