@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 by Thomas Trojer <thomas@trojer.net>
+ * Copyright (c) 2016 by Thomas Trojer <thomas@trojer.net>
  * LINN - A small L-System interpreter.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -22,8 +22,10 @@ import static com.google.common.base.Preconditions.*;
 import linn.core.Linn;
 import linn.core.LinnContainer;
 import linn.core.RuleProductionContainer;
+import linn.core.execute.state.LinnTurtle;
 import linn.core.lang.production.BranchProduction;
 import linn.core.lang.production.FProduction;
+import linn.core.lang.production.FRewriteProduction;
 import linn.core.lang.production.RewriteProduction;
 import linn.core.lang.production.RotationProduction;
 
@@ -34,10 +36,11 @@ import linn.core.lang.production.RotationProduction;
  * If the rule id occurs during a production iteration, it is rewritten (i.e.
  * replaced) by the contents of this production part. Such production contents
  * can contain rewriting rules itself or describe certain state changes (e.g.
- * those of a <i>turtle</i> that stores render information like current position
+ * those of a {@link LinnTurtle} that stores render information like current
+ * position
  * and orientation).
  *
- * @author Thomas Trojer <thomas@trojer.net>
+ * @author Thomas Trojer <thomas@trojer.net> -- Initial contribution
  * @param <T>
  */
 public class ProductionRuleProductionBuilder<T extends LinnContainer>
@@ -81,9 +84,21 @@ public class ProductionRuleProductionBuilder<T extends LinnContainer>
 		return this;
 	}
 
+	public ProductionRuleProductionBuilder<T> F(String ruleName) {
+		final FRewriteProduction fRewriteProd = new FRewriteProduction(ruleName, this.parent.getLinn());
+		this.ruleProductionContainer.addRuleProduction(this.ruleId, fRewriteProd);
+		return this;
+	}
+
 	public ProductionRuleProductionBuilder<T> F(double length) {
 		final FProduction fProd = new FProduction(length);
 		this.ruleProductionContainer.addRuleProduction(this.ruleId, fProd);
+		return this;
+	}
+
+	public ProductionRuleProductionBuilder<T> F(double length, String ruleName) {
+		final FRewriteProduction fRewriteProd = new FRewriteProduction(ruleName, length, this.parent.getLinn());
+		this.ruleProductionContainer.addRuleProduction(this.ruleId, fRewriteProd);
 		return this;
 	}
 
@@ -101,34 +116,29 @@ public class ProductionRuleProductionBuilder<T extends LinnContainer>
 		return branchProd.getProductionBuilder();
 	}
 
-	public ProductionRuleProductionBuilder<T> f() {
-		// TODO impl
-		return this;
-	}
-
-	public ProductionRuleProductionBuilder<T> rotate(final float deltaYaw,
-			final float deltaPitch, final float deltaRoll) {
+	public ProductionRuleProductionBuilder<T> rotate(final double deltaYaw,
+			final double deltaPitch, final double deltaRoll) {
 		final RotationProduction rotProd = new RotationProduction(deltaYaw,
 				deltaPitch, deltaRoll);
 		this.ruleProductionContainer.addRuleProduction(this.ruleId, rotProd);
 		return this;
 	}
 
-	public ProductionRuleProductionBuilder<T> yaw(final float deltaYaw) {
+	public ProductionRuleProductionBuilder<T> yaw(final double deltaYaw) {
 		final RotationProduction rotProd = new RotationProduction(deltaYaw, 0,
 				0);
 		this.ruleProductionContainer.addRuleProduction(this.ruleId, rotProd);
 		return this;
 	}
 
-	public ProductionRuleProductionBuilder<T> pitch(final float deltaPitch) {
+	public ProductionRuleProductionBuilder<T> pitch(final double deltaPitch) {
 		final RotationProduction rotProd = new RotationProduction(0, deltaPitch,
 				0);
 		this.ruleProductionContainer.addRuleProduction(this.ruleId, rotProd);
 		return this;
 	}
 
-	public ProductionRuleProductionBuilder<T> roll(final float deltaRoll) {
+	public ProductionRuleProductionBuilder<T> roll(final double deltaRoll) {
 		final RotationProduction rotProd = new RotationProduction(0, 0,
 				deltaRoll);
 		this.ruleProductionContainer.addRuleProduction(this.ruleId, rotProd);

@@ -70,8 +70,7 @@ public class LinnExecutor implements LinnContainer {
 		return this;
 	}
 
-	public LinnExecutor onStateChanged(
-			final StateChangeHandler stateChangeHandler) {
+	public LinnExecutor onStateChanged(final StateChangeHandler stateChangeHandler) {
 		checkNotNull(stateChangeHandler);
 		this.stateChangeHandler = stateChangeHandler;
 		if (this.stateChangeHandler != null) {
@@ -81,10 +80,20 @@ public class LinnExecutor implements LinnContainer {
 	}
 
 	public ProductionRuleProductionBuilder<LinnExecutor> withAxiom() {
-		return new ProductionRuleProductionBuilder<LinnExecutor>(this.axiom,
-				this, -1);
+		return new ProductionRuleProductionBuilder<LinnExecutor>(this.axiom, this, -1);
 	}
 
+	/**
+	 * Tells the executor whether a history of (immutable) states shall be
+	 * tracked while performing a number of iterations.
+	 *
+	 * @param trace
+	 *            <code>true</code> if states shall be traced (accessible via
+	 *            {@link LinnTurtle#getPreviousState()}, <code>false</code>
+	 *            otherwise, in which {@link LinnTurtle#getPreviousState()} will
+	 *            always return <code>null</code>.
+	 * @return This executor for chaining.
+	 */
 	public LinnExecutor traceStates(boolean trace) {
 		this.traceStates = trace;
 		this.state.setTrace(this.traceStates);
@@ -135,12 +144,10 @@ public class LinnExecutor implements LinnContainer {
 		});
 	}
 
-	public LinnExecutor executeAtMost(final int iterations,
-			final PostExecutionHandler postHandler) {
+	public LinnExecutor executeAtMost(final int iterations, final PostExecutionHandler postHandler) {
 		checkNotNull(postHandler);
 		checkArgument(iterations > 0);
-		while (this.isTerminated() == false
-				&& this.getIterationCount() < iterations) {
+		while (this.isTerminated() == false && this.getIterationCount() < iterations) {
 			this.execute(false);
 			postHandler.handle(this.result);
 		}
@@ -170,8 +177,7 @@ public class LinnExecutor implements LinnContainer {
 		Iterator<Production> productionIter = this.openProductions.iterator();
 		while (productionIter.hasNext()) {
 			final Production production = productionIter.next();
-			final List<Production> newProductions = production
-					.execute(this.state);
+			final List<Production> newProductions = production.execute(this.state);
 			if (newProductions == null) {
 				// terminated, nothing to add
 				continue;
@@ -256,8 +262,7 @@ public class LinnExecutor implements LinnContainer {
 				return true;
 			} else if (currentProduction instanceof BranchProduction<?>) {
 				BranchProduction<?> branchProduction = (BranchProduction<?>) currentProduction;
-				List<Production> branchInnerProductions = branchProduction
-						.getRuleProductions(-1);
+				List<Production> branchInnerProductions = branchProduction.getRuleProductions(-1);
 				for (Production branchInnerProduction : branchInnerProductions) {
 					openProduction.offer(branchInnerProduction);
 				}

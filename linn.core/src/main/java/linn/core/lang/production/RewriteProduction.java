@@ -1,3 +1,20 @@
+/**
+ * Copyright (c) 2016 by Thomas Trojer <thomas@trojer.net>
+ * LINN - A small L-System interpreter.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package linn.core.lang.production;
 
 import java.util.List;
@@ -5,14 +22,47 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.TreeMap;
 
-import linn.core.Linn;
-import linn.core.execute.state.LinnTurtle;
-
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 
 import static com.google.common.base.Preconditions.*;
 
+import linn.core.Linn;
+import linn.core.execute.StateChangeHandler;
+import linn.core.execute.state.LinnTurtle;
+
+/**
+ * A rewriting production is used to refer to a rule of the LINN L-system
+ * definition that should be revisited in the next execution iteration. That
+ * means that the reference to a rule (as defined by this production) is
+ * replaced with the actual contents of this rule.
+ * <p>
+ *
+ * In stochastic L-systems an arbitrary matching rule may be target of a
+ * rewrite. The actual target is decided locally at runtime.
+ * <p>
+ *
+ * When considering the example rule
+ *
+ * <pre>
+ * A ---> F A
+ * </pre>
+ *
+ * then after every "move" as part of an {@link FProduction} the rule "A" is
+ * reconsidered. When executing the rule "A" for three time, the following
+ * result is expected:
+ *
+ * <pre>
+ * F F F A
+ * </pre>
+ *
+ * Note that rewrite productions do never modify the state of a
+ * {@link LinnTurtle}. Hence, {@link StateChangeHandler}s will never fire when a
+ * rewrite production has been processed.
+ * <p>
+ *
+ * @author Thomas Trojer <thomas@trojer.net> -- Initial contribution
+ */
 public class RewriteProduction implements Production {
 
 	private static final Random LOCAL_RAND = new Random(

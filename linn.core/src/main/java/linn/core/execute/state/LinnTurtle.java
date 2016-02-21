@@ -1,3 +1,20 @@
+/**
+ * Copyright (c) 2016 by Thomas Trojer <thomas@trojer.net>
+ * LINN - A small L-System interpreter.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package linn.core.execute.state;
 
 import java.util.List;
@@ -26,13 +43,15 @@ import linn.core.math.Quaternion;
  *
  * The default initial orientation of the Turtle is along the positive y-axis
  * (i.e. pitch or attitude).
+ * <p>
  *
- * @author Thomas Trojer <thomas@trojer.net>
+ * @author Thomas Trojer <thomas@trojer.net> -- Initial contribution
  */
 public class LinnTurtle {
 
 	protected Quaternion position;
-	protected Quaternion view;
+	protected Quaternion forward;
+	protected Quaternion up;
 	protected Quaternion rotation;
 
 	protected Map<String, Object> properties;
@@ -40,12 +59,12 @@ public class LinnTurtle {
 	protected LinnTurtle previousState = null;
 	protected boolean traceStates = false;
 
-	protected List<StateChangeHandler> stateChangeHandlers = Lists
-			.newArrayList();
+	protected List<StateChangeHandler> stateChangeHandlers = Lists.newArrayList();
 
 	public LinnTurtle(final LinnTurtle copy) {
 		this(copy.position.getX(), copy.position.getY(), copy.position.getZ(),
-				copy.getView(), copy.getRotation(), copy.properties);
+				copy.getView(), copy.getUp(), copy.getRotation(),
+				copy.properties);
 		// fields additionally considered for copying
 		this.stateChangeHandlers = Lists.newArrayList(copy.stateChangeHandlers);
 		this.previousState = copy.previousState;
@@ -57,20 +76,21 @@ public class LinnTurtle {
 	}
 
 	public LinnTurtle(double x, double y, double z) {
-		this(x, y, z, Quaternion.vector(0, 1, 0));
+		this(x, y, z, Quaternion.vector(0, 1, 0), Quaternion.vector(0, 0, -1));
 	}
 
-	public LinnTurtle(double x, double y, double z, final Quaternion view) {
-		this(x, y, z, view, Quaternion.vector(0, 0, 0), Maps.newHashMap());
+	public LinnTurtle(double x, double y, double z, final Quaternion view, final Quaternion up) {
+		this(x, y, z, view, up, Quaternion.rotation(0, 0, 0), Maps.newHashMap());
 	}
 
-	public LinnTurtle(double x, double y, double z, final Quaternion view,
-			final Quaternion rotation,
-			final Map<String, Object> initialProperties) {
+	public LinnTurtle(double x, double y, double z, final Quaternion view, final Quaternion up, final Quaternion rotation, final Map<String, Object> initialProperties) {
 		checkNotNull(initialProperties);
 		this.position = Quaternion.vector(x, y, z);
-		this.rotation = rotation;
-		this.view = view.normalized();
+		this.rotation = rotation.normalized();
+		this.forward = view.normalized();
+		this.up = up.normalized();
+		// TODO assert or correct orthogonality between forward and up via
+		// temporary left and recalculated up
 		this.properties = Maps.newHashMap(initialProperties);
 	}
 
@@ -79,8 +99,7 @@ public class LinnTurtle {
 	}
 
 	public LinnTurtle getPreviousState() {
-		checkArgument(this.traceStates,
-				"Tracing of previous states is disabled. Enable with LinnExecutor#traceStates(true).");
+		checkArgument(this.traceStates, "Tracing of previous states is disabled. Enable with LinnExecutor#traceStates(true).");
 		return this.previousState;
 	}
 
@@ -96,41 +115,37 @@ public class LinnTurtle {
 		this.stateChangeHandlers.clear();
 	}
 
-	// private void updateRotation() {
-	// this.rotation = Quaternion.rotation(this.yaw, this.pitch, this.roll);
-	// }
-
 	public void move(double distance) {
 		this.traceStateChange();
-		Quaternion moveBy = this.view.scalar(distance);
+		Quaternion moveBy = this.forward.vectorized().normalized().scalar(distance);
 		this.position = this.position.plus(moveBy);
 		this.notifyStateChange();
 	}
 
 	public void yaw(double delta) {
 		this.traceStateChange();
-		Quaternion deltaRotation = Quaternion.rotation(delta, 0, 0)
-				.normalized();
-		this.view = deltaRotation.times(this.view)
-				.times(deltaRotation.conjugated()).normalized();
+		Quaternion deltaRotation = Quaternion.rotation(this.up.getX(), this.up.getY(), this.up.getZ(), delta).normalized();
+		this.rotation = this.rotation.times(deltaRotation);
+		this.forward = deltaRotation.times(this.forward).times(deltaRotation.conjugated()).normalized();
+		// up is not modified on yaw
 		this.notifyStateChange();
 	}
 
 	public void pitch(double delta) {
 		this.traceStateChange();
-		Quaternion deltaRotation = Quaternion.rotation(0, delta, 0)
-				.normalized();
-		this.view = deltaRotation.times(this.view)
-				.times(deltaRotation.conjugated()).normalized();
+		Quaternion deltaRotation = Quaternion.rotation(0, delta, 0).normalized();
+		this.rotation = this.rotation.times(deltaRotation);
+		this.forward = deltaRotation.times(this.forward).times(deltaRotation.conjugated()).normalized();
+		this.up = this.rotation.times(this.up).times(this.rotation.conjugated()).normalized();
 		this.notifyStateChange();
 	}
 
 	public void roll(double delta) {
 		this.traceStateChange();
-		Quaternion deltaRotation = Quaternion.rotation(0, 0, delta)
-				.normalized();
-		this.view = deltaRotation.times(this.view)
-				.times(deltaRotation.conjugated()).normalized();
+		Quaternion deltaRotation = Quaternion.rotation(this.forward.getX(), this.forward.getY(), this.forward.getZ(), delta).normalized();
+		this.rotation = this.rotation.times(deltaRotation);
+		this.up = deltaRotation.times(this.up).times(deltaRotation.conjugated()).normalized();
+		// forward is not modified on roll
 		this.notifyStateChange();
 	}
 
@@ -157,8 +172,13 @@ public class LinnTurtle {
 
 	public double getPitch() {
 		Quaternion q = this.rotation;
-		return Math.atan2(2 * q.getX() * q.getW() - 2 * q.getY() * q.getZ(),
-				1 - 2 * q.getX() * q.getX() - 2 * q.getZ() * q.getZ());
+		double gimbalPole = q.getX() * q.getY() + q.getZ() * q.getW();
+		if (gimbalPole > 0.499) {
+			return 2 * Math.atan2(q.getX(), q.getW());
+		} else if (gimbalPole < -0.499) {
+			return -2 * Math.atan2(q.getX(), q.getW());
+		}
+		return Math.atan2(2 * q.getX() * q.getW() - 2 * q.getY() * q.getZ(), 1 - 2 * q.getX() * q.getX() - 2 * q.getZ() * q.getZ());
 	}
 
 	public double getPitchDegrees() {
@@ -167,8 +187,11 @@ public class LinnTurtle {
 
 	public double getRoll() {
 		Quaternion q = this.rotation;
-		return Math.atan2(2 * q.getY() * q.getW() - 2 * q.getX() * q.getZ(),
-				1 - 2 * q.getY() * q.getY() - 2 * q.getZ() * q.getZ());
+		double gimbalPole = q.getX() * q.getY() + q.getZ() * q.getW();
+		if (gimbalPole > 0.499 || gimbalPole < -0.499) {
+			return 0;
+		}
+		return Math.atan2(2 * q.getY() * q.getW() - 2 * q.getX() * q.getZ(), 1 - 2 * q.getY() * q.getY() - 2 * q.getZ() * q.getZ());
 	}
 
 	public double getRollDegrees() {
@@ -180,7 +203,11 @@ public class LinnTurtle {
 	}
 
 	public Quaternion getView() {
-		return new Quaternion(this.view);
+		return new Quaternion(this.forward);
+	}
+
+	public Quaternion getUp() {
+		return new Quaternion(this.up);
 	}
 
 	private void traceStateChange() {
@@ -200,20 +227,20 @@ public class LinnTurtle {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder("state {\n");
-		sb.append("\tposition (" + this.getX() + ", " + this.getY() + ", "
-				+ this.getZ() + ")\n");
+		sb.append("\tposition (" + this.getX() + ", " + this.getY() + ", " + this.getZ() + ")\n");
 		if (this.traceStates && this.previousState != null) {
-			sb.append("\tprevious position (" + this.getX() + ", " + this.getY()
-					+ ", " + this.getZ() + ")\n");
+			sb.append("\tprevious position (" + this.getX() + ", " + this.getY() + ", " + this.getZ() + ")\n");
 		} else if (this.traceStates) {
 			sb.append("\tprevious position (n/a)\n");
 		}
-		sb.append("\trotation euler (" + this.getYawDegrees() + ", "
-				+ this.getPitchDegrees() + ", " + this.getRollDegrees()
-				+ ")\n");
-		sb.append("\trotation quaternion (" + this.getRotation().getX() + ", "
-				+ this.getRotation().getY() + ", " + this.getRotation().getZ()
-				+ ", " + this.getRotation().getW() + ")\n");
+		// sb.append("\trotation euler (" + this.getYawDegrees() + ", "
+		// + this.getPitchDegrees() + ", " + this.getRollDegrees()
+		// + ")\n");
+		// sb.append("\trotation quaternion (" + this.getRotation().getX() + ",
+		// "
+		// + this.getRotation().getY() + ", " + this.getRotation().getZ()
+		// + ", " + this.getRotation().getW() + ")\n");
+		sb.append("\tview direction (" + this.getView().getX() + ", " + this.getView().getY() + ", " + this.getView().getZ() + ")\n");
 		sb.append("}");
 		return sb.toString();
 	}

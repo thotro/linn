@@ -6,15 +6,20 @@ import linn.core.execute.state.LinnTurtle;
 import linn.core.lang.LinnBuilder;
 import processing.core.PApplet;
 
-public class BasicExample extends PApplet {
+public class SierpinskiExample extends PApplet {
+
+	private static double angle = 1 / 3.0 * Math.PI;
+	private static int len = 2;
 
 	private LinnExecutor linnExecutor;
 
 	@Override
 	public void setup() {
-		final Linn linn = LinnBuilder.newLinn("BasicExample").withAuthor("Thomas Trojer")
-				// rule: H ---> ROTATE MOVE-100 H
-				.withRule("H").andProduction().yaw(1.0f).F(100).rewrite("H").done()
+		final Linn linn = LinnBuilder.newLinn("SierpinskiExample").withAuthor("Thomas Trojer")
+				// rule: A ---> B - A - B
+				.withRule("A").andProduction().F(len, "B").yaw(-angle).F(len, "A").yaw(-angle).F(len, "B").done()
+				// rule: B ---> A + B + A
+				.withRule("B").andProduction().F(len, "A").yaw(angle).F(len, "B").yaw(angle).F(len, "A").done()
 				// finalize
 				.build();
 		// configuring the execution environment
@@ -25,10 +30,10 @@ public class BasicExample extends PApplet {
 			}
 			// connect previous and current position with a line
 			LinnTurtle tp = t.getPreviousState();
-			this.line(400 + (float) tp.getX(), 300 + (float) tp.getY(), 400 + (float) t.getX(), 300 + (float) t.getY());
+			this.line((float) tp.getX(), (float) tp.getY(), (float) t.getX(), (float) t.getY());
 		})
 				// axiom to start the L-System with: H
-				.withAxiom().rewrite("H").done();
+				.withAxiom().F(len, "A").done();
 	}
 
 	@Override
@@ -49,6 +54,6 @@ public class BasicExample extends PApplet {
 	}
 
 	public static void main(String _args[]) {
-		PApplet.main(new String[] { linn.examples.BasicExample.class.getName() });
+		PApplet.main(new String[] { linn.examples.SierpinskiExample.class.getName() });
 	}
 }

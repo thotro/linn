@@ -37,4 +37,23 @@ public class TurtleQuaternionTest {
 		turtle.move(20);
 		System.out.println(turtle);
 	}
+
+	@Test
+	public void testTurtleRoll() {
+		LinnTurtle turtle = new LinnTurtle();
+		System.out.println(turtle);
+
+		turtle.move(3);
+		System.out.println(turtle);
+
+		turtle = new LinnTurtle(turtle);
+		turtle.roll(-Math.PI * 0.5);
+		turtle.move(2);
+		System.out.println(turtle);
+
+		turtle = new LinnTurtle(turtle);
+		turtle.roll(-Math.PI * 0.5f);
+		turtle.move(10);
+		System.out.println(turtle);
+	}
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 by Thomas Trojer <thomas@trojer.net>
+ * Copyright (c) 2016 by Thomas Trojer <thomas@trojer.net>
  * LINN - A small L-System interpreter.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -25,7 +25,7 @@ import linn.core.LinnContainer;
  * meta information as well as a set of production rules which are built by
  * {@link ProductionRuleBuilder}s.
  *
- * @author Thomas Trojer <thomas@trojer.net>
+ * @author Thomas Trojer <thomas@trojer.net> -- Initial contribution
  */
 public class LinnBuilder implements LinnContainer {
 

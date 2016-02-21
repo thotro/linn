@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 by Thomas Trojer <thomas@trojer.net>
+ * Copyright (c) 2016 by Thomas Trojer <thomas@trojer.net>
  * LINN - A small L-System interpreter.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -32,9 +32,10 @@ import linn.core.lang.production.ProductionParameter;
  * <p>
  * A production rule has the general form of Id [+ condition][+ weight] +
  * production, where <i>production</i> is covered by
- * {@link ProductionRuleProductionBuilder} .
+ * {@link ProductionRuleProductionBuilder}.
+ * <p>
  *
- * @author Thomas Trojer <thomas@trojer.net>
+ * @author Thomas Trojer <thomas@trojer.net> -- Initial contribution
  *
  */
 public class ProductionRuleBuilder {

@@ -1,9 +1,29 @@
+/**
+ * Copyright (c) 2016 by Thomas Trojer <thomas@trojer.net>
+ * LINN - A small L-System interpreter.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+
 package linn.core.math;
 
+import linn.core.execute.state.LinnTurtle;
+
 /**
- * A quaternion. There's nothing more to say! ;)
+ * A quaternion. There's nothing more to say! ;) ... well, it's used for
+ * rotating any {@link LinnTurtle}.
  *
- * @author Thomas Trojer <thomas@trojer.net>
+ * @author Thomas Trojer <thomas@trojer.net> -- Initial contribution
  */
 public class Quaternion {
 
@@ -34,19 +54,16 @@ public class Quaternion {
 
 	@Override
 	public String toString() {
-		return this.w + " + " + this.x + "i + " + this.y + "j + " + this.z
-				+ "k";
+		return this.w + " + " + this.x + "i + " + this.y + "j + " + this.z + "k";
 	}
 
 	public double norm() {
-		return Math.sqrt(this.w * this.w + this.x * this.x + this.y * this.y
-				+ this.z * this.z);
+		return Math.sqrt(this.w * this.w + this.x * this.x + this.y * this.y + this.z * this.z);
 	}
 
 	public Quaternion normalized() {
 		double norm = this.norm();
-		return new Quaternion(this.w / norm, this.x / norm, this.y / norm,
-				this.z / norm);
+		return new Quaternion(this.w / norm, this.x / norm, this.y / norm, this.z / norm);
 	}
 
 	public Quaternion conjugated() {
@@ -82,14 +99,16 @@ public class Quaternion {
 	}
 
 	public Quaternion inverted() {
-		double d = this.w * this.w + this.x * this.x + this.y * this.y
-				+ this.z * this.z;
-		return new Quaternion(this.w / d, -this.x / d, -this.y / d,
-				-this.z / d);
+		double d = this.w * this.w + this.x * this.x + this.y * this.y + this.z * this.z;
+		return new Quaternion(this.w / d, -this.x / d, -this.y / d, -this.z / d);
 	}
 
 	public Quaternion divides(Quaternion b) {
 		return this.times(b.inverted());
+	}
+
+	public static Quaternion identity() {
+		return new Quaternion(1, 0, 0, 0);
 	}
 
 	public static Quaternion rotation(double yaw, double pitch, double roll) {
@@ -111,8 +130,24 @@ public class Quaternion {
 		return new Quaternion(nw, nx, ny, nz);
 	}
 
+	public static Quaternion rotation(double x, double y, double z, double angle) {
+		double d = Quaternion.vector(x, y, z).norm();
+		if (d == 0f) {
+			return Quaternion.identity();
+		}
+		d = 1.0 / d;
+		angle = angle < 0 ? Math.PI * 2.0 - (-angle % (Math.PI * 2.0)) : angle % (Math.PI * 2.0);
+		float angleSin = (float) Math.sin(angle / 2);
+		float angleCos = (float) Math.cos(angle / 2);
+		return new Quaternion(angleCos, d * x * angleSin, d * y * angleSin, d * z * angleSin).normalized();
+	}
+
 	public static Quaternion vector(double x, double y, double z) {
 		return new Quaternion(0, x, y, z);
+	}
+
+	public Quaternion vectorized() {
+		return new Quaternion(0, this.getX(), this.getY(), this.getZ());
 	}
 
 	public double getW() {
