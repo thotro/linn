@@ -17,9 +17,18 @@ LINN ({L}-System interpreter developed in {INN}sbruck) is a small, configurable 
  * Syntax mostly based on what can be found in Prusinkiewicz, Lindenmayer, Hanan, et al., "The Algorithmic Beauty of Plants", freely available [here](http://algorithmicbotany.org/papers/#abop)
  * Examples will show both API usage, actual rendering in Processing/OpenGL and export of production results as meshes/point clouds
 
-Project status: 10%
+Project status: 40%
 
-Current milestone: Java fluent API and execution infrastructure
+What works so far: 
+ * Fluent API for defining L-systems and executing them
+ * State change and post execution notifications to trigger e.g. rendering
+ * Deterministic, context-free L-systems
+ * Stochastic L-systems
+ * Basic examples (2D) rendered as [Processing](https://processing.org/) sketches
+
+Current milestone: further productions, parameterized rules, examples
+
+Below you can find some example outputs:
 
 That's it for now :)
 
