@@ -26,6 +26,7 @@ import com.google.common.collect.Maps;
 import static com.google.common.base.Preconditions.*;
 
 import linn.core.execute.StateChangeHandler;
+import linn.core.math.Bounds;
 import linn.core.math.NumberUtil;
 import linn.core.math.Quaternion;
 
@@ -56,6 +57,8 @@ public class LinnTurtle {
 
 	protected Map<String, Object> properties;
 
+	protected Bounds bounds;
+
 	protected LinnTurtle previousState = null;
 	protected boolean traceStates = false;
 
@@ -69,6 +72,8 @@ public class LinnTurtle {
 		this.stateChangeHandlers = Lists.newArrayList(copy.stateChangeHandlers);
 		this.previousState = copy.previousState;
 		this.traceStates = copy.traceStates;
+		// override bounds on copy
+		this.bounds = copy.bounds;
 	}
 
 	public LinnTurtle() {
@@ -86,12 +91,14 @@ public class LinnTurtle {
 	public LinnTurtle(double x, double y, double z, final Quaternion view, final Quaternion up, final Quaternion rotation, final Map<String, Object> initialProperties) {
 		checkNotNull(initialProperties);
 		this.position = Quaternion.vector(x, y, z);
+		this.bounds = new Bounds(x, y, z, x, y, z);
 		this.rotation = rotation.normalized();
 		this.forward = view.normalized();
 		this.up = up.normalized();
 		// TODO assert or correct orthogonality between forward and up via
 		// temporary left and recalculated up
 		this.properties = Maps.newHashMap(initialProperties);
+		this.previousState = null;
 	}
 
 	public void setTrace(boolean trace) {
@@ -101,6 +108,15 @@ public class LinnTurtle {
 	public LinnTurtle getPreviousState() {
 		checkArgument(this.traceStates, "Tracing of previous states is disabled. Enable with LinnExecutor#traceStates(true).");
 		return this.previousState;
+	}
+
+	/**
+	 * Gets the current {@link Bounds}.
+	 *
+	 * @return The current bounds. Never <code>null</code>.
+	 */
+	public Bounds getBounds() {
+		return this.bounds;
 	}
 
 	public void addStateChangeHandler(final StateChangeHandler handler) {
@@ -119,6 +135,7 @@ public class LinnTurtle {
 		this.traceStateChange();
 		Quaternion moveBy = this.forward.vectorized().normalized().scalar(distance);
 		this.position = this.position.plus(moveBy);
+		this.bounds = this.bounds.expandFor(this.position);
 		this.notifyStateChange();
 	}
 

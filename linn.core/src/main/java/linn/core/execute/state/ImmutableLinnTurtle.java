@@ -39,6 +39,7 @@ public class ImmutableLinnTurtle extends LinnTurtle {
 		// NOTE: no state change handlers
 		this.previousState = copy.previousState;
 		this.traceStates = copy.traceStates;
+		this.bounds = copy.bounds;
 	}
 
 	@Override
