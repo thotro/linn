@@ -7,7 +7,9 @@ LINN ({L}-System interpreter developed in {INN}sbruck) is a small, configurable 
    * Both context-free and context-sensitive ones
    * Both stochastic and deterministic ones
    * Parameterized ones
- * Written in Java 8 with optional ANTLR4 grammar
+ * Written in Java 8 and offering
+   * a fluent API for specifying and executing L-systems
+   * an optional ANTLR4 grammar (for external, textual specification)
  * Core library has no noteworthy external dependencies (just Google Guava)
  * Core library does not include any render capabilities (although examples do)
  * User code injection to accomplish the following:
@@ -20,7 +22,7 @@ LINN ({L}-System interpreter developed in {INN}sbruck) is a small, configurable 
 Status
 ------
 
-Project status: 40%
+Project status: 50%
 
 What works so far: 
  * Fluent API for defining L-systems and executing them
