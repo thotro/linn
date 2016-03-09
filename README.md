@@ -36,8 +36,8 @@ Current milestone: further productions, parameterized rules, examples
 Contents
 --------
 
- * [Project structure](../../wiki/Project-structure)
- * [Example outputs](../../wiki/Example-outputs)
+ * [Project structure](../../wiki/Linn-Documentation#project-structure)
+ * [Example outputs](../../wiki/Linn-Documentation#example-outputs)
 
 That's it for now :)
 
