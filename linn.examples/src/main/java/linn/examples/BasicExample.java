@@ -47,7 +47,7 @@ public class BasicExample extends PApplet {
 				.build();
 		// configuring the execution environment
 		this.linnExecutor = LinnExecutor.newExecutor().useLinn(linn).traceStates(true).onStateChanged(t -> {
-			if (t.getPreviousState() == null) {
+			if (t.hasPreviousState() == false) {
 				// await a second position to draw a line
 				return;
 			}

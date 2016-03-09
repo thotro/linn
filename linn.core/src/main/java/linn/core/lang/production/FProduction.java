@@ -54,25 +54,36 @@ import linn.core.math.NumberUtil;
  */
 public class FProduction implements Production {
 
-	private double length = 1.0;
-
-	public FProduction() {
-	}
+	private final double length;
+	private final boolean jump;
 
 	public FProduction(double length) {
+		this(length, false);
+	}
+
+	public FProduction(double length, boolean jump) {
 		checkArgument(NumberUtil.doubleIsDifferent(length, 0, 1e-9));
 		this.length = length;
+		this.jump = jump;
 	}
 
 	@Override
 	public List<Production> execute(final LinnTurtle state,
 			final ProductionParameter... parameters) {
-		state.move(this.length);
+		if (this.jump) {
+			state.jump(this.length);
+		} else {
+			state.move(this.length);
+		}
 		return Lists.newArrayList(this);
 	}
 
 	@Override
 	public String getName() {
-		return "F(" + this.length + ")";
+		char type = 'F';
+		if (this.jump) {
+			type = 'f';
+		}
+		return type + "(" + this.length + ")";
 	}
 }

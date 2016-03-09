@@ -78,14 +78,21 @@ public class ProductionRuleProductionBuilder<T extends LinnContainer>
 		return this.F(length);
 	}
 
+	public ProductionRuleProductionBuilder<T> jump(double length) {
+		return this.F(length);
+	}
+
 	public ProductionRuleProductionBuilder<T> F() {
-		final FProduction fProd = new FProduction();
+		double length = this.getLinn().getDefaultMoveLength();
+		final FProduction fProd = new FProduction(length);
 		this.ruleProductionContainer.addRuleProduction(this.ruleId, fProd);
 		return this;
 	}
 
 	public ProductionRuleProductionBuilder<T> F(String ruleName) {
-		final FRewriteProduction fRewriteProd = new FRewriteProduction(ruleName, this.parent.getLinn());
+		double length = this.getLinn().getDefaultMoveLength();
+		final FProduction fProduction = new FProduction(length);
+		final FRewriteProduction fRewriteProd = new FRewriteProduction(ruleName, fProduction, this.parent.getLinn());
 		this.ruleProductionContainer.addRuleProduction(this.ruleId, fRewriteProd);
 		return this;
 	}
@@ -97,7 +104,36 @@ public class ProductionRuleProductionBuilder<T extends LinnContainer>
 	}
 
 	public ProductionRuleProductionBuilder<T> F(double length, String ruleName) {
-		final FRewriteProduction fRewriteProd = new FRewriteProduction(ruleName, length, this.parent.getLinn());
+		final FProduction fProduction = new FProduction(length);
+		final FRewriteProduction fRewriteProd = new FRewriteProduction(ruleName, fProduction, this.parent.getLinn());
+		this.ruleProductionContainer.addRuleProduction(this.ruleId, fRewriteProd);
+		return this;
+	}
+
+	public ProductionRuleProductionBuilder<T> f() {
+		double length = this.getLinn().getDefaultMoveLength();
+		final FProduction fProd = new FProduction(length, true);
+		this.ruleProductionContainer.addRuleProduction(this.ruleId, fProd);
+		return this;
+	}
+
+	public ProductionRuleProductionBuilder<T> f(String ruleName) {
+		double length = this.getLinn().getDefaultMoveLength();
+		final FProduction fProduction = new FProduction(length, true);
+		final FRewriteProduction fRewriteProd = new FRewriteProduction(ruleName, fProduction, this.parent.getLinn());
+		this.ruleProductionContainer.addRuleProduction(this.ruleId, fRewriteProd);
+		return this;
+	}
+
+	public ProductionRuleProductionBuilder<T> f(double length) {
+		final FProduction fProd = new FProduction(length, true);
+		this.ruleProductionContainer.addRuleProduction(this.ruleId, fProd);
+		return this;
+	}
+
+	public ProductionRuleProductionBuilder<T> f(double length, String ruleName) {
+		final FProduction fProduction = new FProduction(length, true);
+		final FRewriteProduction fRewriteProd = new FRewriteProduction(ruleName, fProduction, this.parent.getLinn());
 		this.ruleProductionContainer.addRuleProduction(this.ruleId, fRewriteProd);
 		return this;
 	}
@@ -124,6 +160,16 @@ public class ProductionRuleProductionBuilder<T extends LinnContainer>
 		return this;
 	}
 
+	public ProductionRuleProductionBuilder<T> negYaw() {
+		double yawAngle = this.getLinn().getDefaultYawAngle();
+		return this.yaw(-yawAngle);
+	}
+
+	public ProductionRuleProductionBuilder<T> yaw() {
+		double yawAngle = this.getLinn().getDefaultYawAngle();
+		return this.yaw(yawAngle);
+	}
+
 	public ProductionRuleProductionBuilder<T> yaw(final double deltaYaw) {
 		final RotationProduction rotProd = new RotationProduction(deltaYaw, 0,
 				0);
@@ -131,11 +177,31 @@ public class ProductionRuleProductionBuilder<T extends LinnContainer>
 		return this;
 	}
 
+	public ProductionRuleProductionBuilder<T> negPitch() {
+		double pitchAngle = this.getLinn().getDefaultPitchAngle();
+		return this.pitch(-pitchAngle);
+	}
+
+	public ProductionRuleProductionBuilder<T> pitch() {
+		double pitchAngle = this.getLinn().getDefaultPitchAngle();
+		return this.pitch(pitchAngle);
+	}
+
 	public ProductionRuleProductionBuilder<T> pitch(final double deltaPitch) {
 		final RotationProduction rotProd = new RotationProduction(0, deltaPitch,
 				0);
 		this.ruleProductionContainer.addRuleProduction(this.ruleId, rotProd);
 		return this;
+	}
+
+	public ProductionRuleProductionBuilder<T> negRoll() {
+		double rollAngle = this.getLinn().getDefaultRollAngle();
+		return this.roll(-rollAngle);
+	}
+
+	public ProductionRuleProductionBuilder<T> roll() {
+		double rollAngle = this.getLinn().getDefaultRollAngle();
+		return this.roll(rollAngle);
 	}
 
 	public ProductionRuleProductionBuilder<T> roll(final double deltaRoll) {

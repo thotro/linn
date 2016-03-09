@@ -20,29 +20,31 @@ package linn.examples;
 import linn.core.Linn;
 import linn.core.execute.LinnExecutor;
 import linn.core.execute.state.LinnTurtle;
+import linn.core.execute.state.StateChangeType;
 import linn.core.lang.LinnBuilder;
 import linn.core.math.Bounds;
 import processing.core.PApplet;
 
 /**
- * A 2D processing sketch that draws a continuous line version of the Sierpinski
- * triangle. This sketch features
+ * A 2D processing sketch that draws a islands and lakes pattern.
+ * This sketch features
  * <ul>
  * <li>new L-system production iteration on mouse click</li>
  * <li>post-production rendering by using the history of state changes (traces)
  * </li>
  * <li>auto focus on draw area by making use of the computed bounds of a
  * {@link LinnTurtle}</li>
+ * <li>preset default turtle move length and angles</li>
  * </ul>
  *
  * @author Thomas Trojer <thomas@trojer.net> -- Initial contribution
  */
-public class SierpinskiExample extends PApplet {
+public class IslandsAndLakesExample extends PApplet {
 
 	private static final int WINDOW_WIDTH = 800;
 	private static final int WINDOW_HEIGHT = 800;
 
-	private static final double ANGLE = 1 / 3.0 * Math.PI;
+	private static final double ANGLE = 1 / 2.0 * Math.PI;
 	private static final int LEN = 2;
 
 	private LinnExecutor linnExecutor;
@@ -50,17 +52,19 @@ public class SierpinskiExample extends PApplet {
 	@Override
 	public void setup() {
 		// the L-system definition
-		final Linn linn = LinnBuilder.newLinn("SierpinskiExample").withAuthor("Thomas Trojer")
-				// rule: A ---> B - A - B
-				.withRule("A").andProduction().F(LEN, "B").yaw(-ANGLE).F(LEN, "A").yaw(-ANGLE).F(LEN, "B").done()
-				// rule: B ---> A + B + A
-				.withRule("B").andProduction().F(LEN, "A").yaw(ANGLE).F(LEN, "B").yaw(ANGLE).F(LEN, "A").done()
+		final Linn linn = LinnBuilder.newLinn("IslandsAndLakesExample").withAuthor("Thomas Trojer")
+				// default length and angles (so that rules are less verbose)
+				.withDefaultMoveLength(LEN).withDefaultAngles(ANGLE)
+				// rule: A ---> A + B - A A + A + A A + A B + A A - B + A A - A - A A - A B - A A A
+				.withRule("A").andProduction().F("A").yaw().f("B").negYaw().F("A").F("A").yaw().F("A").yaw().F("A").F("A").yaw().F("A").f("B").yaw().F("A").F("A").negYaw().f("B").yaw().F("A").F("A").negYaw().F("A").negYaw().F("A").F("A").negYaw().F("A").f("B").negYaw().F("A").F("A").F("A").done()
+				// rule: B ---> B B B B B B
+				.withRule("B").andProduction().f("B").f("B").f("B").f("B").f("B").f("B").done()
 				// finalize
 				.build();
 		// configuring the execution environment
 		this.linnExecutor = LinnExecutor.newExecutor().useLinn(linn).traceStates(true)
-				// axiom to start the L-System with: H
-				.withAxiom().F(LEN, "A").done();
+				// axiom to start the L-System with: A + A + A + A
+				.withAxiom().F("A").yaw().F("A").yaw().F("A").yaw().F("A").done();
 	}
 
 	@Override
@@ -81,6 +85,7 @@ public class SierpinskiExample extends PApplet {
 		// get post production state (and its trace)
 		LinnTurtle state = this.linnExecutor.getState();
 		if (state.hasPreviousState() == false) {
+			// no state yet
 			return;
 		}
 		LinnTurtle previousState = state.getPreviousState();
@@ -91,7 +96,10 @@ public class SierpinskiExample extends PApplet {
 		this.translate((float) -bounds.getMinX(), (float) -bounds.getMinY());
 		// render lines that connect states
 		while (previousState != null) {
-			this.line((float) state.getX(), (float) state.getY(), (float) previousState.getX(), (float) previousState.getY());
+			if (state.getStateChangeType() != StateChangeType.JUMP) {
+				// turtle moved, draw
+				this.line((float) state.getX(), (float) state.getY(), (float) previousState.getX(), (float) previousState.getY());
+			}
 			// update states
 			state = previousState;
 			previousState = state.getPreviousState();
@@ -100,6 +108,6 @@ public class SierpinskiExample extends PApplet {
 	}
 
 	public static void main(String _args[]) {
-		PApplet.main(new String[] { linn.examples.SierpinskiExample.class.getName() });
+		PApplet.main(new String[] { linn.examples.IslandsAndLakesExample.class.getName() });
 	}
 }

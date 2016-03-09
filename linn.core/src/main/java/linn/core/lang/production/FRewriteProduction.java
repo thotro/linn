@@ -19,6 +19,8 @@ package linn.core.lang.production;
 
 import java.util.List;
 
+import static com.google.common.base.Preconditions.*;
+
 import linn.core.Linn;
 import linn.core.execute.state.LinnTurtle;
 
@@ -36,14 +38,10 @@ public class FRewriteProduction extends RewriteProduction {
 
 	private FProduction fProduction;
 
-	public FRewriteProduction(String ruleName, Linn linn) {
+	public FRewriteProduction(String ruleName, final FProduction fProduction, Linn linn) {
 		super(ruleName, linn);
-		this.fProduction = new FProduction();
-	}
-
-	public FRewriteProduction(String ruleName, double length, Linn linn) {
-		super(ruleName, linn);
-		this.fProduction = new FProduction(length);
+		checkNotNull(fProduction);
+		this.fProduction = fProduction;
 	}
 
 	@Override

@@ -51,6 +51,33 @@ public class LinnBuilder implements LinnContainer {
 		return this;
 	}
 
+	public LinnBuilder withDefaultMoveLength(double moveLength) {
+		this.linn.setDefaultMoveLength(moveLength);
+		return this;
+	}
+
+	public LinnBuilder withDefaultAngles(double yawPitchRollAngle) {
+		this.linn.setDefaultYawAngle(yawPitchRollAngle);
+		this.linn.setDefaultPitchAngle(yawPitchRollAngle);
+		this.linn.setDefaultRollAngle(yawPitchRollAngle);
+		return this;
+	}
+
+	public LinnBuilder withDefaultYawAngle(double yawAngle) {
+		this.linn.setDefaultYawAngle(yawAngle);
+		return this;
+	}
+
+	public LinnBuilder withDefaultPitchAngle(double pitchAngle) {
+		this.linn.setDefaultPitchAngle(pitchAngle);
+		return this;
+	}
+
+	public LinnBuilder withDefaultRollAngle(double rollAngle) {
+		this.linn.setDefaultRollAngle(rollAngle);
+		return this;
+	}
+
 	public Linn build() {
 		return this.getLinn();
 	}

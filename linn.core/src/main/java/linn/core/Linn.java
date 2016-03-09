@@ -35,6 +35,11 @@ public class Linn implements RuleProductionContainer {
 	private String name;
 	private String author;
 	private Date date;
+	// settings
+	private double defaultMoveLength = 1.0;
+	private double defaultYawAngle = Math.PI * 0.5f;
+	private double defaultPitchAngle = Math.PI * 0.5f;
+	private double defaultRollAngle = Math.PI * 0.5f;
 	// rules
 	final Map<String, List<Integer>> ruleIdsOfRuleName = Maps.newHashMap();
 	final Map<Integer, Double> weightOfRuleId = Maps.newHashMap();
@@ -71,6 +76,39 @@ public class Linn implements RuleProductionContainer {
 	protected void setDate(final Date date) {
 		checkNotNull(date);
 		this.date = date;
+	}
+
+	public void setDefaultMoveLength(double moveLength) {
+		checkArgument(moveLength > 0);
+		this.defaultMoveLength = moveLength;
+	}
+
+	public void setDefaultYawAngle(double yawAngle) {
+		this.defaultYawAngle = yawAngle;
+	}
+
+	public double getDefaultYawAngle() {
+		return this.defaultYawAngle;
+	}
+
+	public void setDefaultPitchAngle(double pitchAngle) {
+		this.defaultPitchAngle = pitchAngle;
+	}
+
+	public double getDefaultPitchAngle() {
+		return this.defaultPitchAngle;
+	}
+
+	public void setDefaultRollAngle(double rollAngle) {
+		this.defaultRollAngle = rollAngle;
+	}
+
+	public double getDefaultRollAngle() {
+		return this.defaultRollAngle;
+	}
+
+	public double getDefaultMoveLength() {
+		return this.defaultMoveLength;
 	}
 
 	public void addRule(final Integer ruleId, final String ruleName) {

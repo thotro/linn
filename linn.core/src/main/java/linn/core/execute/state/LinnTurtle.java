@@ -55,6 +55,8 @@ public class LinnTurtle {
 	protected Quaternion up;
 	protected Quaternion rotation;
 
+	protected StateChangeType stateChangeType = StateChangeType.NONE;
+
 	protected Map<String, Object> properties;
 
 	protected Bounds bounds;
@@ -64,6 +66,13 @@ public class LinnTurtle {
 
 	protected List<StateChangeHandler> stateChangeHandlers = Lists.newArrayList();
 
+	/**
+	 * Copy constructor. Also copies state change handlers, a turtle's previous
+	 * state, bounds and all settings.
+	 *
+	 * @param copy
+	 *            The turtle to be copied.
+	 */
 	public LinnTurtle(final LinnTurtle copy) {
 		this(copy.position.getX(), copy.position.getY(), copy.position.getZ(),
 				copy.getView(), copy.getUp(), copy.getRotation(),
@@ -72,10 +81,17 @@ public class LinnTurtle {
 		this.stateChangeHandlers = Lists.newArrayList(copy.stateChangeHandlers);
 		this.previousState = copy.previousState;
 		this.traceStates = copy.traceStates;
+		this.stateChangeType = copy.stateChangeType;
 		// override bounds on copy
 		this.bounds = copy.bounds;
 	}
 
+	/**
+	 * Constructor. Places the turtle at the origin
+	 * <code>(x: 0, y: 0, z: 0)</code>, looking along the positive
+	 * <code>y</code>-axis and having negative <code>z</code> being the upward
+	 * orientation of the turtle.
+	 */
 	public LinnTurtle() {
 		this(0, 0, 0);
 	}
@@ -110,6 +126,18 @@ public class LinnTurtle {
 		return this.previousState;
 	}
 
+	public boolean hasPreviousState() {
+		return this.previousState != null;
+	}
+
+	public boolean isTracing() {
+		return this.traceStates;
+	}
+
+	public StateChangeType getStateChangeType() {
+		return this.stateChangeType;
+	}
+
 	/**
 	 * Gets the current {@link Bounds}.
 	 *
@@ -136,7 +164,15 @@ public class LinnTurtle {
 		Quaternion moveBy = this.forward.vectorized().normalized().scalar(distance);
 		this.position = this.position.plus(moveBy);
 		this.bounds = this.bounds.expandFor(this.position);
-		this.notifyStateChange();
+		this.notifyStateChange(StateChangeType.MOVE);
+	}
+
+	public void jump(double distance) {
+		this.traceStateChange();
+		Quaternion moveBy = this.forward.vectorized().normalized().scalar(distance);
+		this.position = this.position.plus(moveBy);
+		this.bounds = this.bounds.expandFor(this.position);
+		this.notifyStateChange(StateChangeType.JUMP);
 	}
 
 	public void yaw(double delta) {
@@ -145,7 +181,7 @@ public class LinnTurtle {
 		this.rotation = this.rotation.times(deltaRotation);
 		this.forward = deltaRotation.times(this.forward).times(deltaRotation.conjugated()).normalized();
 		// up is not modified on yaw
-		this.notifyStateChange();
+		this.notifyStateChange(StateChangeType.ROTATE);
 	}
 
 	public void pitch(double delta) {
@@ -154,7 +190,7 @@ public class LinnTurtle {
 		this.rotation = this.rotation.times(deltaRotation);
 		this.forward = deltaRotation.times(this.forward).times(deltaRotation.conjugated()).normalized();
 		this.up = this.rotation.times(this.up).times(this.rotation.conjugated()).normalized();
-		this.notifyStateChange();
+		this.notifyStateChange(StateChangeType.ROTATE);
 	}
 
 	public void roll(double delta) {
@@ -163,7 +199,7 @@ public class LinnTurtle {
 		this.rotation = this.rotation.times(deltaRotation);
 		this.up = deltaRotation.times(this.up).times(deltaRotation.conjugated()).normalized();
 		// forward is not modified on roll
-		this.notifyStateChange();
+		this.notifyStateChange(StateChangeType.ROTATE);
 	}
 
 	public double getX() {
@@ -234,7 +270,8 @@ public class LinnTurtle {
 		}
 	}
 
-	private void notifyStateChange() {
+	private void notifyStateChange(final StateChangeType stateChangeType) {
+		this.stateChangeType = stateChangeType;
 		// notify state change handlers
 		for (StateChangeHandler handler : this.stateChangeHandlers) {
 			handler.handle(this);
