@@ -1,11 +1,24 @@
 apply plugin: 'java'
+apply plugin: 'maven-publish'
 
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 
 dependencies {
-    compile project(':linn.core')
+    compile('linn:linn-core:+') { changing = true }
     compile('org.processing:core:3.+')
     testCompile('junit:junit:4.+')
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId 'linn'
+            artifactId 'linn-examples'
+            version '0.1'
+            from components.java
+        }
+    }
 }

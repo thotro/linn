@@ -1,4 +1,5 @@
 apply plugin: 'java'
+apply plugin: 'maven-publish'
 
 repositories {
     mavenCentral()
@@ -7,4 +8,15 @@ repositories {
 dependencies {
     compile('com.google.guava:guava:+')
     testCompile('junit:junit:4.+')
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId 'linn'
+            artifactId 'linn-core'
+            version '0.1'
+            from components.java
+        }
+    }
 }

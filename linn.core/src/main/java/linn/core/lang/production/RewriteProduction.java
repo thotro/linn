@@ -68,7 +68,7 @@ public class RewriteProduction implements Production {
 	private static final Random LOCAL_RAND = new Random(
 			System.currentTimeMillis());
 
-	private final String ruleName;
+	protected final String ruleName;
 	private final Linn linn;
 
 	public RewriteProduction(final String ruleName, final Linn linn) {

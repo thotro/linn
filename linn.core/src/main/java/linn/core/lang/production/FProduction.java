@@ -23,9 +23,11 @@ import com.google.common.collect.Lists;
 
 import static com.google.common.base.Preconditions.*;
 
+import linn.core.Linn;
 import linn.core.execute.PostExecutionHandler;
 import linn.core.execute.StateChangeHandler;
 import linn.core.execute.state.LinnTurtle;
+import linn.core.lang.LinnBuilder;
 import linn.core.math.NumberUtil;
 
 /**
@@ -46,16 +48,17 @@ import linn.core.math.NumberUtil;
  *
  * then the final outcome is expected to be "2 moves" of the {@link LinnTurtle}
  * along its view current direction. The second move is parameterized with the
- * length (or distance) of the move, while for the first one a length of
- * <code>1.0</code> is assumed.
+ * length (or distance) of the move, while for the first one a default length of
+ * <code>1.0</code> (or as set by {@link Linn#setDefaultMoveLength(double)} or
+ * via {@link LinnBuilder#withDefaultMoveLength(double)}) is assumed.
  * <p>
  *
  * @author Thomas Trojer <thomas@trojer.net> -- Initial contribution
  */
 public class FProduction implements Production {
 
-	private final double length;
-	private final boolean jump;
+	protected final double length;
+	protected final boolean jump;
 
 	public FProduction(double length) {
 		this(length, false);

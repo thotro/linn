@@ -51,4 +51,13 @@ public class FRewriteProduction extends RewriteProduction {
 		// just consider the rewrite result of this production
 		return super.execute(state, parameters);
 	}
+
+	@Override
+	public String getName() {
+		char type = 'F';
+		if (this.fProduction.jump) {
+			type = 'f';
+		}
+		return type + "(" + this.fProduction.length + ", " + this.ruleName + ")";
+	}
 }
